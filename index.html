@@ -1,11 +1,39 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script>
+  // Automatic asset path resolver (supports both GitHub root upload & assets/ folder)
+  document.addEventListener('error', function(e) {
+    var target = e.target;
+    if (!target) return;
+    if (target.tagName === 'IMG') {
+      var s = target.getAttribute('src') || '';
+      if (s.startsWith('assets/')) {
+        target.src = s.replace('assets/', '');
+      } else if (!s.startsWith('assets/') && !target.dataset.triedAssets) {
+        target.dataset.triedAssets = '1';
+        target.src = 'assets/' + s;
+      }
+    } else if (target.tagName === 'SOURCE') {
+      var video = target.parentElement;
+      if (video && video.tagName === 'VIDEO') {
+        var vs = target.getAttribute('src') || '';
+        if (vs.startsWith('assets/')) {
+          video.src = vs.replace('assets/', '');
+        } else {
+          video.src = 'assets/' + vs;
+        }
+        video.load();
+        video.play().catch(function(){});
+      }
+    }
+  }, true);
+</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Daksh Intelligence</title>
   <link rel="icon" type="image/x-icon" href="logo.ico">
-  <link rel="icon" type="image/jpeg" href="assets/daksh-logo.png">
+  <link rel="icon" type="image/jpeg" href="daksh-logo.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#07090e">
 
@@ -136,7 +164,8 @@
   </style>
 </head>
 <body>
-  <video class="wallpaper" autoplay muted loop playsinline>
+  <video id="bgWallpaper" class="wallpaper" src="live-wallpaper.mp4" autoplay muted loop playsinline preload="auto">
+    <source src="live-wallpaper.mp4" type="video/mp4">
     <source src="assets/live-wallpaper.mp4" type="video/mp4">
   </video>
   <div class="wallpaper-shade"></div>
@@ -144,7 +173,7 @@
 
   <main id="loginScreen" class="screen login-screen">
     <section class="login-card glass">
-      <img class="brand-logo login-logo" src="assets/daksh-logo.png" alt="Daksh Intelligence logo">
+      <img class="brand-logo login-logo" src="daksh-logo.png" alt="Daksh Intelligence logo">
       <div class="eyebrow">YOUR PERSONAL WORKSPACE</div>
       <h1>Daksh <span>Intelligence</span></h1>
       <p class="muted">One workspace. Three powerful ways to create.</p>
@@ -193,7 +222,7 @@
   <main id="homeScreen" class="screen home-screen hidden">
     <header class="topbar glass">
       <a class="brand" href="#" aria-label="Daksh Intelligence home">
-        <img class="brand-logo" src="assets/daksh-logo.png" alt="">
+        <img class="brand-logo" src="daksh-logo.png" alt="">
         <span>Daksh <b>Intelligence</b></span>
       </a>
       <div class="topbar-right">
@@ -259,7 +288,7 @@
   <div id="app-main-layout" class="flex flex-col h-full w-full">
     
     <!-- A. PC DESKTOP HEADER (Desktop >= 768px: Exact Reference Picture 2 Layout) -->
-    <header class="hidden md:flex h-14 bg-[#060a14]/95 backdrop-blur-md border-b border-cyan-950/60 px-4 items-center justify-between gap-4 shrink-0 z-30">
+    <header class="desktop-only desktop-flex h-14 bg-[#060a14]/95 backdrop-blur-md border-b border-cyan-950/60 px-4 items-center justify-between gap-4 shrink-0 z-30">
       <div class="flex items-center gap-2 shrink-0">
         <!-- Sidebar Open / Close Toggle Button (Ctrl+B) -->
         <button id="btn-sidebar-toggle" onclick="toggleSidebar()" class="p-2 text-slate-400 hover:text-cyan-300 hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer border border-slate-800/60" title="Toggle Sidebar (Ctrl+B)">
@@ -275,7 +304,7 @@
         <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('chat')">
           <div class="relative shrink-0">
             <div class="absolute -inset-0.5 rounded-full bg-cyan-500/50 blur-xs"></div>
-            <img src="assets/daksh-logo.png" alt="Daksh Intelligence Logo" class="relative w-7 h-7 rounded-full object-cover ring-1 ring-cyan-400/60 shadow-md shadow-cyan-500/20" />
+            <img src="daksh-logo.png" alt="Daksh Intelligence Logo" class="relative w-7 h-7 rounded-full object-cover ring-1 ring-cyan-400/60 shadow-md shadow-cyan-500/20" />
           </div>
           <span class="font-bold text-sm tracking-tight text-white whitespace-nowrap">Daksh Intelligence</span>
           
@@ -316,7 +345,7 @@
     </header>
 
     <!-- B. MOBILE TOP HEADER (Mobile < 768px: Exact User Mobile Design) -->
-    <header class="flex md:hidden w-full h-16 bg-[#07090e]/95 backdrop-blur-md border-b border-[#1b2438] px-3.5 items-center justify-between shrink-0 z-30 sticky top-0">
+    <header class="mobile-only flex w-full h-16 bg-[#07090e]/95 backdrop-blur-md border-b border-[#1b2438] px-3.5 items-center justify-between shrink-0 z-30 sticky top-0">
       <div class="flex items-center gap-3">
         <!-- 3-Line Hamburger Menu Toggle Button (Exact from user snippet) -->
         <button id="hamburgerBtn" onclick="toggleSidebar(true)" aria-label="Open Sidebar Menu" class="w-10 h-10 rounded-xl bg-[#0e131f] border border-[#1b2438] hover:border-blue-500/50 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition group shrink-0 cursor-pointer">
@@ -380,7 +409,7 @@
         <div id="drawerBackdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden transition-opacity duration-300 opacity-0 md:hidden" onclick="toggleSidebar(false)"></div>
 
         <!-- ================= MOBILE SIDEBAR DRAWER (Sliding from Left: Exact User Snippet) ================= -->
-        <aside id="sidebarDrawer" class="md:hidden fixed top-0 left-0 bottom-0 w-[82%] max-w-[310px] bg-[#090d16] border-r border-[#1b2438] z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-4 shadow-2xl">
+        <aside id="sidebarDrawer" class="mobile-only fixed top-0 left-0 bottom-0 w-[82%] max-w-[310px] bg-[#090d16] border-r border-[#1b2438] z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-4 shadow-2xl">
           
           <div class="flex flex-col gap-4 overflow-y-auto">
             <!-- Drawer Header with Logo & Brand Name -->
@@ -476,7 +505,7 @@
         </aside>
 
         <!-- ================= C. PC DESKTOP SIDEBAR (Desktop >= 768px: Reference Picture 2) ================= -->
-        <aside id="chat-sidebar" class="hidden md:flex w-64 bg-[#090f1d]/90 border border-cyan-950/60 rounded-2xl flex-col shrink-0 overflow-hidden select-none shadow-xl backdrop-blur-xl">
+        <aside id="chat-sidebar" class="desktop-only desktop-flex w-64 bg-[#090f1d]/90 border border-cyan-950/60 rounded-2xl flex-col shrink-0 overflow-hidden select-none shadow-xl backdrop-blur-xl">
           <div class="p-3 border-b border-slate-800/70 flex items-center gap-2">
             <!-- + New Chat Button with Rich Indigo/Purple Gradient -->
             <button onclick="createNewConversation()" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:brightness-110 rounded-xl transition-all shadow-md shadow-indigo-600/30 border border-indigo-400/30 cursor-pointer">
@@ -531,7 +560,7 @@
             <div id="chat-empty-hero" class="w-full max-w-2xl mx-auto py-2 sm:py-4">
               
               <!-- 1. PC DESKTOP HERO (>= 768px: Picture 2) -->
-              <div class="hidden md:block w-full cyber-panel rounded-3xl p-6 sm:p-8 space-y-5 text-center">
+              <div class="desktop-only desktop-block w-full cyber-panel rounded-3xl p-6 sm:p-8 space-y-5 text-center">
                 <div>
                   <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Welcome to Daksh Intelligence</h1>
                   <p class="text-xs sm:text-sm text-slate-400 mt-1">
@@ -589,7 +618,7 @@
               </div>
 
               <!-- 2. MOBILE HERO (< 768px: Exact User Snippet Theme) -->
-              <div class="block md:hidden text-center pt-1 pb-2 space-y-4">
+              <div class="mobile-only block text-center pt-1 pb-2 space-y-4">
                 
                 <!-- Animated Main Metallic Emblem Logo Avatar -->
                 <div class="relative w-24 h-24 mx-auto">
@@ -720,7 +749,7 @@
           <!-- ================= BOTTOM CHAT INPUT (Dual PC & Mobile Mode) ================= -->
           
           <!-- 1. PC Desktop Extruded Input Capsule (>= 768px: Picture 2) -->
-          <div class="hidden md:block p-4 bg-gradient-to-t from-[#040711] via-[#040711]/90 to-transparent shrink-0">
+          <div class="desktop-only desktop-block p-4 bg-gradient-to-t from-[#040711] via-[#040711]/90 to-transparent shrink-0">
             <div class="max-w-3xl mx-auto">
               <div id="attachment-preview" class="hidden mb-2 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-cyan-300 flex items-center justify-between">
                 <span id="attachment-name" class="truncate"></span>
@@ -758,7 +787,7 @@
           </div>
 
           <!-- 2. Mobile Interactive Chat Input Bar (< 768px: Exact User Snippet Theme) -->
-          <div class="block md:hidden p-3 bg-[#07090e] border-t border-[#1b2438] shrink-0">
+          <div class="mobile-only block p-3 bg-[#07090e] border-t border-[#1b2438] shrink-0">
             <!-- Mobile Attachment Badge Preview -->
             <div id="mobile-attachment-preview" class="hidden mb-2 px-3 py-1.5 bg-[#0e131f] border border-blue-500/40 rounded-xl flex items-center justify-between text-xs text-blue-300">
               <span class="flex items-center gap-2 truncate"><i class="fa-solid fa-paperclip text-blue-400"></i> <span id="mobile-attachment-name" class="truncate">file.txt</span></span>
@@ -849,7 +878,7 @@
         <div class="relative group">
           <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-70 blur-md animate-pulse"></div>
           <img
-            src="assets/daksh-logo.png"
+            src="daksh-logo.png"
             alt="Daksh Intelligence Logo"
             class="relative w-16 h-16 rounded-full object-cover border-2 border-cyan-400/60 shadow-xl"
           />
@@ -1211,7 +1240,7 @@
 
       <div class="flex items-center gap-3">
         <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-indigo-600/30 border border-cyan-500/40 flex items-center justify-center shadow-lg shrink-0">
-          <img src="assets/daksh-logo.png" alt="Logo" class="w-9 h-9 rounded-xl object-cover" />
+          <img src="daksh-logo.png" alt="Logo" class="w-9 h-9 rounded-xl object-cover" />
         </div>
         <div>
           <h2 class="text-base font-bold text-white tracking-wide">Install Daksh Intelligence</h2>
@@ -1330,7 +1359,7 @@
       <div class="eyebrow">PERSONALISE YOUR WORKSPACE</div>
       <h2 id="settingsTitle">Account settings</h2>
       <div class="profile-editor">
-        <img id="profilePreview" class="profile-preview" src="assets/daksh-logo.png" alt="Profile picture">
+        <img id="profilePreview" class="profile-preview" src="daksh-logo.png" alt="Profile picture">
         <div class="profile-edit-actions">
           <strong id="settingsEmail">Your account</strong>
           <label class="upload-photo-btn" for="profileFile">Choose profile picture</label>
@@ -2544,7 +2573,7 @@
             <div class="flex items-start gap-2.5 mb-4 group">
               <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#090d16] border border-cyan-500/40 flex items-center justify-center shrink-0 mt-0.5 shadow-sm shadow-cyan-500/20 overflow-hidden">
                 <span class="text-[9px] font-black text-cyan-400 block md:hidden">DA</span>
-                <img src="assets/daksh-logo.png" class="w-full h-full object-cover hidden md:block">
+                <img src="daksh-logo.png" class="w-full h-full object-cover hidden md:block">
               </div>
 
               <div class="max-w-[90%] sm:max-w-[80%] bg-[#0e131f] md:bg-[#0b1322] border border-[#1b2438] md:border-cyan-950/60 p-3.5 sm:px-4 sm:py-3 rounded-2xl rounded-tl-xs text-xs text-gray-200 shadow-lg space-y-2">
@@ -2811,6 +2840,33 @@
         closeGoogleChooser();
       }
     });
+
+    // Expose all workstation core methods on window for robust cross-module & inline event handling
+    window.appState = appState;
+    window.renderConversationsList = renderConversationsList;
+    window.renderMessages = renderMessages;
+    window.applySidebarState = applySidebarState;
+    window.toggleSidebar = toggleSidebar;
+    window.createNewConversation = createNewConversation;
+    window.clearAllConversations = clearAllConversations;
+    window.removeAttachment = removeAttachment;
+    window.sendMessage = sendMessage;
+    window.stopGeneration = stopGeneration;
+    window.ingestUrl = ingestUrl;
+    window.openQuickActionsModal = openQuickActionsModal;
+    window.closeQuickActionsModal = closeQuickActionsModal;
+    window.switchTab = switchTab;
+    window.addManualDoc = addManualDoc;
+    window.clearCurrentChat = clearCurrentChat;
+    window.sendQuickPrompt = sendQuickPrompt;
+    window.selectPrompt = selectPrompt;
+    window.openSettingsHub = openSettingsHub;
+    window.closeSettingsHub = closeSettingsHub;
+    window.toggleMicrophone = toggleMicrophone;
+    window.toggleAudioSpeech = toggleAudioSpeech;
+    window.handleAppInstallClick = handleAppInstallClick;
+    window.scrollChatToBottom = scrollChatToBottom;
+
   </script>
 
 <script type="module" src="app.js"></script>

@@ -35,6 +35,18 @@ const menuUser = document.getElementById('menuUser');
 const themeButton = document.getElementById('themeButton');
 const wallpaperButton = document.getElementById('wallpaperButton');
 const wallpaper = document.querySelector('.wallpaper');
+
+// Robust live wallpaper autoplay & path fallback engine
+if (wallpaper) {
+  wallpaper.play().catch(() => {});
+  const playWallpaperOnce = () => {
+    wallpaper.play().catch(() => {});
+  };
+  document.addEventListener('click', playWallpaperOnce, { once: true });
+  document.addEventListener('touchstart', playWallpaperOnce, { once: true });
+  document.addEventListener('keydown', playWallpaperOnce, { once: true });
+}
+
 const modal = document.getElementById('appModal');
 const settingsModal = document.getElementById('settingsModal');
 const settingsMessage = document.getElementById('settingsMessage');
@@ -94,7 +106,7 @@ function renderUser(user) {
   accountName.textContent = name;
   avatarLetters.textContent = initials(name);
   menuUser.textContent = user.email || 'Signed in';
-  const photo = user.photoURL || 'assets/daksh-logo.png';
+  const photo = user.photoURL || 'daksh-logo.png';
   profilePreview.src = photo;
   settingsName.value = user.displayName || '';
   settingsEmail.textContent = user.email || 'Google account';
@@ -226,6 +238,11 @@ onAuthStateChanged(auth, user => {
   if (user) renderUser(user);
   else {
     currentUser = null;
+    const chatScreen = document.getElementById('chatScreen');
+    if (chatScreen) {
+      chatScreen.classList.add('hidden');
+      chatScreen.style.display = 'none';
+    }
     homeScreen.classList.add('hidden');
     loginScreen.classList.remove('hidden');
   }
@@ -363,9 +380,15 @@ document.addEventListener('keydown', event => {
 
 function openAIChatApp() {
   const home = document.getElementById('homeScreen');
-  if (home) home.classList.add('hidden');
+  if (home) {
+    home.classList.add('hidden');
+    home.style.display = 'none';
+  }
   const login = document.getElementById('loginScreen');
-  if (login) login.classList.add('hidden');
+  if (login) {
+    login.classList.add('hidden');
+    login.style.display = 'none';
+  }
 
   const chatScreen = document.getElementById('chatScreen');
   if (chatScreen) {
@@ -377,6 +400,11 @@ function openAIChatApp() {
   if (appLayout) {
     appLayout.classList.remove('hidden');
     appLayout.style.display = 'flex';
+  }
+
+  const viewChat = document.getElementById('view-chat');
+  if (viewChat) {
+    viewChat.classList.remove('hidden');
   }
 
   if (currentUser && window.syncUserToChat) {
@@ -413,8 +441,13 @@ function returnToDashboard() {
   const chatScreen = document.getElementById('chatScreen');
   if (chatScreen) {
     chatScreen.classList.add('hidden');
+    chatScreen.style.display = 'none';
   }
-  document.getElementById('homeScreen').classList.remove('hidden');
+  const homeScreen = document.getElementById('homeScreen');
+  if (homeScreen) {
+    homeScreen.classList.remove('hidden');
+    homeScreen.style.display = '';
+  }
 }
 
 function syncUserToChat(user) {
@@ -494,7 +527,7 @@ if (guestBtn) {
       uid: `guest-${Date.now()}`,
       displayName: 'Daksh Guest',
       email: 'guest@daksh.workspace',
-      photoURL: 'assets/daksh-logo.png',
+      photoURL: 'daksh-logo.png',
       isGuest: true
     };
     renderUser(guestUser);
