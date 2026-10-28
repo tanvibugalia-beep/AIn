@@ -1,0 +1,2818 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Daksh Intelligence</title>
+  <link rel="icon" type="image/x-icon" href="logo.ico">
+  <link rel="icon" type="image/jpeg" href="assets/daksh-logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#07090e">
+
+  <!-- Fonts: DM Sans, Manrope, Inter, JetBrains Mono, Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Dashboard & Live Wallpaper Styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Tailwind CSS CDN (for AI Chat Workstation) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked for Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Highlight.js for code blocks -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              bg: '#07090e',
+              card: '#0e131f',
+              border: '#1b2438',
+              hover: '#182033',
+              accent: '#3b82f6',
+              cyan: '#06b6d4',
+              glow: '#2563eb20',
+              obsidian: '#040711',
+              dark: '#070b16',
+              surface: '#0b1222',
+              indigo: '#6366f1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Absolute Viewport Lock for AI Chat */
+    #chatScreen {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      z-index: 30;
+      background-color: #030407;
+    }
+
+    #chat-messages-container {
+      flex: 1 1 0%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .glow-border {
+      border: 1px solid #1b2438;
+      transition: all 0.25s ease-in-out;
+    }
+    .glow-border:hover, .glow-border:active {
+      border-color: #3b82f680;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+    }
+
+    .neon-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+
+    .cyber-panel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(8, 14, 27, 0.95) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+    }
+
+    .cyber-card-quick {
+      background: linear-gradient(145deg, #0e172a 0%, #090e1c 100%);
+      border: 1px solid rgba(56, 189, 248, 0.32);
+      box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.5), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1), 0 0 18px -4px rgba(6, 182, 212, 0.18);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cyber-input-capsule {
+      background: linear-gradient(180deg, #0b1323 0%, #050914 100%);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 14px 40px -6px rgba(0, 0, 0, 0.85), inset 0 1px 2px 0 rgba(255, 255, 255, 0.08), 0 0 22px -3px rgba(6, 182, 212, 0.22);
+    }
+
+    .prose pre {
+      background-color: #020617 !important;
+      border: 1px solid #1e293b;
+      border-radius: 0.6rem;
+      padding: 0.85rem;
+      margin: 0.6rem 0;
+      overflow-x: auto;
+    }
+    .prose code {
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+  <video class="wallpaper" autoplay muted loop playsinline>
+    <source src="assets/live-wallpaper.mp4" type="video/mp4">
+  </video>
+  <div class="wallpaper-shade"></div>
+  <div class="grain"></div>
+
+  <main id="loginScreen" class="screen login-screen">
+    <section class="login-card glass">
+      <img class="brand-logo login-logo" src="assets/daksh-logo.png" alt="Daksh Intelligence logo">
+      <div class="eyebrow">YOUR PERSONAL WORKSPACE</div>
+      <h1>Daksh <span>Intelligence</span></h1>
+      <p class="muted">One workspace. Three powerful ways to create.</p>
+      <div class="auth-tabs" role="tablist" aria-label="Account access">
+        <button class="auth-tab active" id="loginTab" type="button" role="tab" aria-selected="true">Log in</button>
+        <button class="auth-tab" id="createTab" type="button" role="tab" aria-selected="false">Create account</button>
+        <button class="auth-tab" id="phoneTab" type="button" role="tab" aria-selected="false">Phone</button>
+      </div>
+      <form id="loginForm">
+        <div id="nameFieldWrap" class="hidden">
+          <label for="displayNameInput">Your name</label>
+          <input id="displayNameInput" name="displayName" autocomplete="name" placeholder="Your display name" maxlength="60">
+        </div>
+        <label for="username">Email address</label>
+        <input id="username" name="username" type="email" autocomplete="email" placeholder="you@example.com" required maxlength="120">
+        <label for="passcode">Password</label>
+        <input id="passcode" name="passcode" type="password" autocomplete="current-password" placeholder="Enter your password" required minlength="6">
+        <div id="confirmFieldWrap" class="hidden">
+          <label for="confirmPasscode">Confirm password</label>
+          <input id="confirmPasscode" name="confirmPasscode" type="password" autocomplete="new-password" placeholder="Re-enter your password" minlength="6">
+        </div>
+        <label class="remember-row"><input id="rememberSession" type="checkbox" checked><span class="checkmark"></span><span>Remember this session</span></label>
+        <button class="primary-btn" id="submitAuth" type="submit">Enter workspace <span>↗</span></button>
+      </form>
+      <div id="phoneAuthPanel" class="hidden">
+        <label for="phoneNumber">Phone number with country code</label>
+        <input id="phoneNumber" type="tel" autocomplete="tel" placeholder="+91 98765 43210" maxlength="20">
+        <div id="recaptcha-container"></div>
+        <button id="sendOtpButton" class="primary-btn" type="button">Send verification code <span>↗</span></button>
+        <div id="otpWrap" class="hidden">
+          <label for="otpCode">Verification code</label>
+          <input id="otpCode" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter SMS code" maxlength="8">
+          <button id="verifyOtpButton" class="primary-btn" type="button">Verify and sign in <span>✓</span></button>
+        </div>
+      </div>
+      <button id="forgotPassword" class="forgot-link" type="button">Forgot password?</button>
+      <div class="auth-divider"><span></span> OR <span></span></div>
+      <button id="googleButton" class="google-btn" type="button"><span class="google-g">G</span> Continue with Google</button>
+      <button id="guestAccessButton" class="google-btn" type="button" style="margin-top: 9px; border-color: rgba(142,194,255,.3); background: rgba(142,194,255,.08);"><span style="font-size: 15px; margin-right: 4px;">⚡</span> Explore Workstation as Guest</button>
+      <div id="authMessage" class="auth-message" aria-live="polite"></div>
+      <div class="login-note"><span class="status-dot"></span> Interface demo · real Google OAuth needs setup</div>
+    </section>
+    <div class="bottom-caption">BUILT FOR IDEAS, LEARNING & CREATION</div>
+  </main>
+
+  <main id="homeScreen" class="screen home-screen hidden">
+    <header class="topbar glass">
+      <a class="brand" href="#" aria-label="Daksh Intelligence home">
+        <img class="brand-logo" src="assets/daksh-logo.png" alt="">
+        <span>Daksh <b>Intelligence</b></span>
+      </a>
+      <div class="topbar-right">
+        <span class="live-pill"><i></i> LIVE WORKSPACE</span>
+        <button id="accountButton" class="account-button" aria-expanded="false">
+          <span class="avatar" id="avatarLetters">D</span>
+          <span class="account-label"><small>ACCOUNT</small><strong id="accountName">Daksh</strong></span>
+          <span class="chevron">⌄</span>
+        </button>
+        <div id="accountMenu" class="account-menu hidden">
+          <div class="menu-heading">Your account</div>
+          <div class="menu-user" id="menuUser">Signed in</div>
+          <button id="openChatMenuButton" class="menu-action" style="color: #9bcaff; font-weight: 700;">Open AI Chat <span>✳</span></button>
+          <button id="settingsButton" class="menu-action">Account settings <span>⚙</span></button>
+          <button id="themeButton" class="menu-action">Switch to light theme <span>◐</span></button>
+          <button id="wallpaperButton" class="menu-action">Pause live wallpaper <span>Ⅱ</span></button>
+          <button id="logoutButton" class="menu-action danger">Sign out <span>↗</span></button>
+        </div>
+      </div>
+    </header>
+
+    <section class="welcome">
+      <div class="eyebrow"><span class="tiny-line"></span> YOUR DIGITAL COMMAND CENTER</div>
+      <h1>Good to have you here<span class="period">.</span></h1>
+      <p>What would you like to work on today?</p>
+    </section>
+
+    <section class="app-grid" aria-label="Choose an app">
+      <button class="app-card chat-card" data-app="AI Chat">
+        <div class="card-top"><span class="app-icon chat-icon">✳</span><span class="launch-arrow">↗</span></div>
+        <div class="app-tag">01 / CONVERSATION</div>
+        <h2>AI Chat</h2>
+        <p>Ask questions, explore ideas, and get help with everyday tasks.</p>
+        <div class="card-footer"><span class="mini-dot blue"></span> THINK · CREATE · DISCOVER <span class="open-label">Open app ↗</span></div>
+      </button>
+      <button class="app-card study-card" data-app="EduPer with Daksh">
+        <div class="card-top"><span class="app-icon study-icon">⌁</span><span class="launch-arrow">↗</span></div>
+        <div class="app-tag">02 / LEARNING STUDIO</div>
+        <h2>EduPer <span>with Daksh</span></h2>
+        <p>Your study space for notes, explanations, revision, and exam prep.</p>
+        <div class="card-footer"><span class="mini-dot green"></span> LEARN · PRACTISE · GROW <span class="open-label">Open app ↗</span></div>
+      </button>
+      <button class="app-card command-card" data-app="Commanding Studio">
+        <div class="card-top"><span class="app-icon command-icon">⌘</span><span class="launch-arrow">↗</span></div>
+        <div class="app-tag">03 / DEVELOPER STUDIO</div>
+        <h2>Commanding</h2>
+        <p>A coding-focused workspace inspired by developer tools and Python IDEs.</p>
+        <div class="card-footer"><span class="mini-dot purple"></span> CODE · BUILD · RUN <span class="open-label">Open app ↗</span></div>
+      </button>
+    </section>
+
+    <section class="bottom-row">
+      <div class="tip-card glass"><span class="tip-symbol">✦</span><div><strong>Your space, your pace</strong><p>Choose a workspace above to get started.</p></div></div>
+      <div class="system-status glass"><span class="status-dot"></span><span>INTERFACE READY</span><span class="status-divider"></span><span>WALLPAPER ACTIVE</span></div>
+    </section>
+    <footer>DAKSH INTELLIGENCE <span>•</span> A SPACE TO MAKE WHAT'S NEXT</footer>
+  </main>
+
+  
+  <!-- ================= 3. AI CHAT APPLICATION WORKSPACE (SCREEN 3) ================= -->
+  <main id="chatScreen" class="screen chat-screen hidden fixed inset-0 z-30 bg-[#030407] overflow-hidden flex flex-col">
+    <!-- ================= 2. MAIN APPLICATION WORKSPACE (DUAL PC & MOBILE RESPONSIVE ENGINE) ================= -->
+  <div id="app-main-layout" class="flex flex-col h-full w-full">
+    
+    <!-- A. PC DESKTOP HEADER (Desktop >= 768px: Exact Reference Picture 2 Layout) -->
+    <header class="hidden md:flex h-14 bg-[#060a14]/95 backdrop-blur-md border-b border-cyan-950/60 px-4 items-center justify-between gap-4 shrink-0 z-30">
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Sidebar Open / Close Toggle Button (Ctrl+B) -->
+        <button id="btn-sidebar-toggle" onclick="toggleSidebar()" class="p-2 text-slate-400 hover:text-cyan-300 hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer border border-slate-800/60" title="Toggle Sidebar (Ctrl+B)">
+          <i id="sidebar-toggle-icon" data-lucide="panel-left-close" class="w-4 h-4 text-cyan-400"></i>
+        </button>
+
+        <!-- ⌂ Return to Main Dashboard Button -->
+        <button type="button" onclick="returnToDashboard()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 hover:text-white border border-blue-500/30 text-xs font-semibold transition cursor-pointer shadow-sm shrink-0" title="Back to Main Dashboard">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span>Dashboard</span>
+        </button>
+
+        <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('chat')">
+          <div class="relative shrink-0">
+            <div class="absolute -inset-0.5 rounded-full bg-cyan-500/50 blur-xs"></div>
+            <img src="assets/daksh-logo.png" alt="Daksh Intelligence Logo" class="relative w-7 h-7 rounded-full object-cover ring-1 ring-cyan-400/60 shadow-md shadow-cyan-500/20" />
+          </div>
+          <span class="font-bold text-sm tracking-tight text-white whitespace-nowrap">Daksh Intelligence</span>
+          
+        </div>
+      </div>
+
+      <!-- Center Navigation Tabs: Chat & Knowledge Base -->
+      <nav class="flex items-center gap-1 bg-[#0b1222] p-1 rounded-xl border border-slate-800/90 shadow-inner shrink-0">
+        <button id="tab-btn-chat" onclick="switchTab('chat')" class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap bg-indigo-600/40 text-indigo-200 border border-indigo-500/40 shadow-sm cursor-pointer">
+          <i data-lucide="message-square" class="w-3.5 h-3.5 text-indigo-300"></i>
+          <span>Chat</span>
+        </button>
+
+        <button id="tab-btn-knowledge" onclick="switchTab('knowledge')" class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 cursor-pointer">
+          <i data-lucide="book-open" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Knowledge Base</span>
+          <span id="badge-knowledge-count" class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-full px-1.5 py-0.2 text-[10px] font-mono">3</span>
+        </button>
+      </nav>
+
+      <!-- Right Header Actions (Clean: Install App, Quick Actions, Audio Toggle) -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="handleAppInstallClick()" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-cyan-950/80 to-indigo-950/80 hover:from-cyan-900 hover:to-indigo-900 border border-cyan-500/40 rounded-lg text-xs text-cyan-200 transition-all cursor-pointer shadow-sm shadow-cyan-500/20 group" title="Install App on PC or Android Mobile">
+          <i data-lucide="download" class="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+          <span class="font-medium">Install App</span>
+        </button>
+
+        <button onclick="openQuickActionsModal()" class="flex items-center gap-2 px-2.5 py-1.5 bg-[#0b1222] hover:bg-[#101b30] border border-slate-800 rounded-lg text-xs text-slate-300 transition-colors cursor-pointer">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Quick Actions</span>
+          <kbd class="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded text-[10px] text-slate-400 font-mono">Ctrl+K</kbd>
+        </button>
+
+        <button onclick="toggleAudioSpeech()" id="audio-toggle-btn" class="p-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900 border border-slate-800 transition-colors cursor-pointer" title="Toggle Auto-Speech">
+          <i data-lucide="volume-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- B. MOBILE TOP HEADER (Mobile < 768px: Exact User Mobile Design) -->
+    <header class="flex md:hidden w-full h-16 bg-[#07090e]/95 backdrop-blur-md border-b border-[#1b2438] px-3.5 items-center justify-between shrink-0 z-30 sticky top-0">
+      <div class="flex items-center gap-3">
+        <!-- 3-Line Hamburger Menu Toggle Button (Exact from user snippet) -->
+        <button id="hamburgerBtn" onclick="toggleSidebar(true)" aria-label="Open Sidebar Menu" class="w-10 h-10 rounded-xl bg-[#0e131f] border border-[#1b2438] hover:border-blue-500/50 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition group shrink-0 cursor-pointer">
+          <span class="w-5 h-[2px] bg-gray-300 group-hover:bg-blue-400 transition-all rounded-full"></span>
+          <span class="w-5 h-[2px] bg-gray-300 group-hover:bg-blue-400 transition-all rounded-full"></span>
+          <span class="w-5 h-[2px] bg-gray-300 group-hover:bg-blue-400 transition-all rounded-full"></span>
+        </button>
+
+        <!-- Brand Name & Custom Metallic Emblem Logo Display -->
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('chat')">
+          <svg class="w-8 h-8 rounded-full shadow-md shadow-cyan-500/20 shrink-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="chromeRingM1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#e2e8f0"/>
+                <stop offset="30%" stop-color="#64748b"/>
+                <stop offset="50%" stop-color="#cbd5e1"/>
+                <stop offset="70%" stop-color="#334155"/>
+                <stop offset="100%" stop-color="#94a3b8"/>
+              </linearGradient>
+              <linearGradient id="neonGlowM1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#06b6d4"/>
+                <stop offset="50%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="92" stroke="url(#neonGlowM1)" stroke-width="3" opacity="0.8"/>
+            <circle cx="100" cy="100" r="88" stroke="url(#chromeRingM1)" stroke-width="8" fill="#090d16"/>
+            <circle cx="100" cy="100" r="62" stroke="url(#chromeRingM1)" stroke-width="4" fill="#060911"/>
+            <circle cx="100" cy="100" r="58" stroke="#06b6d4" stroke-width="1.5" opacity="0.8" fill="none"/>
+            <polygon points="100,46 142,70 142,120 100,144 58,120 58,70" stroke="url(#chromeRingM1)" stroke-width="3" fill="#0b0f19"/>
+            <path d="M 72 75 L 94 75 C 108 75 114 82 114 93 C 114 104 108 111 94 111 L 72 111 Z M 82 84 L 82 102 L 92 102 C 100 102 104 98 104 93 C 104 88 100 84 92 84 Z" fill="url(#chromeRingM1)"/>
+            <path d="M 112 111 L 124 75 L 136 111 L 126 111 L 124 103 L 115 103 L 113 111 Z M 118 86 L 116 96 L 122 96 Z" fill="url(#chromeRingM1)"/>
+            <text x="100" y="128" font-family="Inter, sans-serif" font-size="7" font-weight="800" fill="#06b6d4" text-anchor="middle" letter-spacing="1">DAKSH</text>
+          </svg>
+          <h1 class="text-sm font-bold text-white tracking-wide truncate max-w-[150px]">Daksh Intelligence</h1>
+        </div>
+      </div>
+
+      <!-- Quick Header Actions (Knowledge Base, Reset, Install) -->
+      <div class="flex items-center gap-2">
+        <button onclick="switchTab('knowledge')" class="relative p-2.5 rounded-xl bg-[#0e131f] border border-[#1b2438] text-gray-300 hover:text-white hover:border-blue-500/40 transition cursor-pointer" title="Knowledge Base">
+          <i class="fa-solid fa-book-bookmark text-xs"></i>
+          <span id="mobile-badge-knowledge-count" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-[#07090e]">3</span>
+        </button>
+        <button onclick="clearCurrentChat()" title="Reset Interface" class="p-2.5 rounded-xl bg-[#0e131f] border border-[#1b2438] text-gray-300 hover:text-white hover:border-blue-500/40 transition cursor-pointer">
+          <i class="fa-solid fa-rotate-right text-xs"></i>
+        </button>
+        <button onclick="handleAppInstallClick()" title="Install App & Download APK" class="p-2.5 rounded-xl bg-[#0e131f] border border-blue-500/40 text-blue-400 hover:text-white hover:bg-blue-600/20 transition cursor-pointer">
+          <i class="fa-solid fa-download text-xs"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE AREA -->
+    <main class="flex-1 flex overflow-hidden relative w-full h-full">
+      
+      <!-- TAB 1: CHAT VIEW -->
+      <section id="view-chat" class="flex-1 flex overflow-hidden w-full h-full p-0 md:p-3 md:gap-3 relative">
+        
+        <!-- ================= MOBILE SIDEBAR DRAWER OVERLAY ================= -->
+        <div id="drawerBackdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden transition-opacity duration-300 opacity-0 md:hidden" onclick="toggleSidebar(false)"></div>
+
+        <!-- ================= MOBILE SIDEBAR DRAWER (Sliding from Left: Exact User Snippet) ================= -->
+        <aside id="sidebarDrawer" class="md:hidden fixed top-0 left-0 bottom-0 w-[82%] max-w-[310px] bg-[#090d16] border-r border-[#1b2438] z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-4 shadow-2xl">
+          
+          <div class="flex flex-col gap-4 overflow-y-auto">
+            <!-- Drawer Header with Logo & Brand Name -->
+            <div class="flex items-center justify-between border-b border-[#1b2438] pb-3.5 pt-1">
+              <div class="flex items-center gap-2.5">
+                <svg class="w-9 h-9 rounded-full shadow-lg shadow-cyan-500/20 shrink-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="100" cy="100" r="92" stroke="url(#neonGlowM1)" stroke-width="3" opacity="0.8"/>
+                  <circle cx="100" cy="100" r="88" stroke="url(#chromeRingM1)" stroke-width="8" fill="#090d16"/>
+                  <circle cx="100" cy="100" r="62" stroke="url(#chromeRingM1)" stroke-width="4" fill="#060911"/>
+                  <circle cx="100" cy="100" r="58" stroke="#06b6d4" stroke-width="1.5" opacity="0.8" fill="none"/>
+                  <polygon points="100,46 142,70 142,120 100,144 58,120 58,70" stroke="url(#chromeRingM1)" stroke-width="3" fill="#0b0f19"/>
+                  <path d="M 72 75 L 94 75 C 108 75 114 82 114 93 C 114 104 108 111 94 111 L 72 111 Z M 82 84 L 82 102 L 92 102 C 100 102 104 98 104 93 C 104 88 100 84 92 84 Z" fill="url(#chromeRingM1)"/>
+                  <path d="M 112 111 L 124 75 L 136 111 L 126 111 L 124 103 L 115 103 L 113 111 Z M 118 86 L 116 96 L 122 96 Z" fill="url(#chromeRingM1)"/>
+                  <text x="100" y="128" font-family="Inter, sans-serif" font-size="7" font-weight="800" fill="#06b6d4" text-anchor="middle" letter-spacing="1">DAKSH</text>
+                </svg>
+
+                <div>
+                  <h2 class="text-sm font-bold text-white tracking-wide leading-tight">Daksh Intelligence</h2>
+                  <span class="text-[10px] font-medium text-cyan-400 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 neon-pulse"></span> Mobile Assistant
+                  </span>
+                </div>
+              </div>
+              <!-- Close Drawer Button -->
+              <button onclick="toggleSidebar(false)" class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-[#182033] transition cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+
+            <!-- + New Chat Button -->
+            <button onclick="createNewConversation(); toggleSidebar(false);" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 active:scale-95 transition cursor-pointer">
+              <i class="fa-solid fa-plus text-xs"></i>
+              <span class="text-xs font-bold">New Chat</span>
+            </button>
+
+            <!-- Return to Dashboard inside Mobile Drawer -->
+            <button type="button" onclick="returnToDashboard(); toggleSidebar(false);" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-600/20 text-blue-300 hover:text-white font-semibold text-xs border border-blue-500/30 transition cursor-pointer mb-2">
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-house text-blue-400"></i>
+                <span>Main Dashboard</span>
+              </div>
+              <i class="fa-solid fa-arrow-left text-xs"></i>
+            </button>
+
+            <!-- Navigation Links -->
+            <nav class="space-y-1">
+              <button onclick="switchTab('chat'); toggleSidebar(false)" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#182033] text-blue-400 font-medium text-xs transition cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-message text-xs"></i>
+                  <span>Chat</span>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+              </button>
+
+              <button onclick="switchTab('knowledge'); toggleSidebar(false)" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#111726] font-medium text-xs transition cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-book-bookmark text-xs"></i>
+                  <span>Knowledge Base</span>
+                </div>
+                <span class="bg-blue-600/30 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-500/30">3</span>
+              </button>
+            </nav>
+
+            <!-- Mobile Conversations List -->
+            <div class="mt-1">
+              <p id="mobile-conv-count-label" class="text-[11px] font-semibold tracking-wider text-gray-400 uppercase px-1 mb-2">Conversations (1)</p>
+              <div id="mobile-conversations-list" class="space-y-1.5">
+                <!-- Populated dynamically by renderConversationsList -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom User Profile Card -->
+          <div class="border-t border-[#1b2438] pt-3 mt-auto shrink-0">
+            <div class="flex items-center justify-between bg-[#0e131f] p-2 rounded-xl border border-[#1b2438]">
+              <div class="flex items-center gap-2.5 min-w-0 cursor-pointer" onclick="openSettingsHub('profile'); toggleSidebar(false)">
+                <div id="mobile-sidebar-avatar" class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center font-bold text-white text-xs shadow-md shrink-0">
+                  D
+                </div>
+                <div class="overflow-hidden min-w-0">
+                  <p id="mobile-sidebar-username" class="text-xs font-semibold text-white truncate">Daksh Bugalia</p>
+                  <span class="text-[10px] text-emerald-400 flex items-center gap-1 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 text-gray-400 shrink-0">
+                <button type="button" onclick="event.stopPropagation(); openSettingsHub('settings'); toggleSidebar(false)" class="p-1.5 hover:text-white rounded-lg hover:bg-[#182033] transition cursor-pointer" title="Settings"><i class="fa-solid fa-sliders text-xs"></i></button>
+                <button type="button" onclick="event.stopPropagation(); handleLogout()" class="p-1.5 hover:text-rose-400 rounded-lg hover:bg-[#182033] transition cursor-pointer" title="Log Out"><i class="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ================= C. PC DESKTOP SIDEBAR (Desktop >= 768px: Reference Picture 2) ================= -->
+        <aside id="chat-sidebar" class="hidden md:flex w-64 bg-[#090f1d]/90 border border-cyan-950/60 rounded-2xl flex-col shrink-0 overflow-hidden select-none shadow-xl backdrop-blur-xl">
+          <div class="p-3 border-b border-slate-800/70 flex items-center gap-2">
+            <!-- + New Chat Button with Rich Indigo/Purple Gradient -->
+            <button onclick="createNewConversation()" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:brightness-110 rounded-xl transition-all shadow-md shadow-indigo-600/30 border border-indigo-400/30 cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>New Chat</span>
+            </button>
+            <button onclick="clearAllConversations()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-xl border border-slate-800 transition-colors cursor-pointer" title="Clear All Chats">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-2 space-y-1">
+            <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 px-2 py-1.5 uppercase tracking-wider">
+              <span id="conv-count-label">Conversations (1)</span>
+            </div>
+            <div id="conversation-list" class="space-y-1"></div>
+          </div>
+
+          <!-- Bottom User Profile & Settings Section -->
+          <div class="p-2.5 border-t border-slate-800/80 bg-[#060a14]/60 space-y-1 shrink-0">
+            <div class="flex items-center justify-between p-1.5 hover:bg-[#10192e] rounded-xl transition-colors group">
+              <div onclick="openSettingsHub('profile')" class="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1" title="View Profile">
+                <div id="sidebar-avatar" class="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center font-bold text-xs ring-1 ring-cyan-500/40 shadow-sm shrink-0">D</div>
+                <div class="min-w-0">
+                  <div id="sidebar-username" class="text-xs font-semibold text-slate-200 group-hover:text-cyan-300 truncate">Daksh</div>
+                  <div class="text-[10px] text-slate-500 truncate flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Online</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="event.stopPropagation(); openSettingsHub('settings')" class="p-1.5 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer" title="Settings Hub">
+                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="event.stopPropagation(); handleLogout()" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer" title="Log Out">
+                  <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ================= CENTER WORKSPACE PANE (Responsive Full Screen) ================= -->
+        <div class="flex-1 flex flex-col h-full w-full min-w-0 bg-[#07090e] md:bg-[#070b16]/90 border-0 md:border md:border-cyan-950/50 rounded-none md:rounded-2xl overflow-hidden relative shadow-2xl backdrop-blur-xl">
+          
+          <!-- Chat Scroll Container: Locked against any horizontal shifting -->
+          <div id="chat-messages-container" class="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-4 sm:py-6 space-y-5 w-full">
+            
+            <!-- HERO CONTAINER (Dual Mode: Desktop Hero on PC, User's exact Mobile Hero on Phone) -->
+            <div id="chat-empty-hero" class="w-full max-w-2xl mx-auto py-2 sm:py-4">
+              
+              <!-- 1. PC DESKTOP HERO (>= 768px: Picture 2) -->
+              <div class="hidden md:block w-full cyber-panel rounded-3xl p-6 sm:p-8 space-y-5 text-center">
+                <div>
+                  <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Welcome to Daksh Intelligence</h1>
+                  <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                    Engineered & Owned by <span class="text-cyan-400 font-semibold">Daksh Bugalia</span> 
+                  </p>
+                </div>
+
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 bg-cyan-950/50 border border-cyan-800/60 rounded-full text-xs text-cyan-300 shadow-sm">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span>Ultra-Fast Answering Mode Active & Microphone Dictation Ready</span>
+                </div>
+
+                <!-- 4 Metallic Quick Cards (Pic 2) -->
+                <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 text-left">
+                  <button onclick="sendQuickPrompt('Write a safe PowerShell script to calculate and clean up %TEMP% and Windows temp files with administrator elevation check.')" class="cyber-card-quick p-4 rounded-2xl flex flex-col justify-between group cursor-pointer">
+                    <div class="font-bold text-xs text-slate-200 group-hover:text-cyan-300 flex items-center justify-between w-full">
+                      <span>Clean Windows Temp Files</span>
+                      <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                      Write a safe PowerShell script to calculate and clean up %TEMP% and Windows temp files with administrator...
+                    </p>
+                  </button>
+
+                  <button onclick="sendQuickPrompt('Write a PowerShell one-liner or script to scan the current drive or directory and output the top 15 largest files formatted in MB/GB.')" class="cyber-card-quick p-4 rounded-2xl flex flex-col justify-between group cursor-pointer">
+                    <div class="font-bold text-xs text-slate-200 group-hover:text-cyan-300 flex items-center justify-between w-full">
+                      <span>Find Top 15 Largest Files</span>
+                      <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                      Write a PowerShell one-liner or script to scan the current drive or directory and output the top 15 largest files...
+                    </p>
+                  </button>
+
+                  <button onclick="sendQuickPrompt('Write a cross-platform script (Bash and Python) to safely batch-rename all files in a folder matching a pattern, adding an incremental counter and creation date.')" class="cyber-card-quick p-4 rounded-2xl flex flex-col justify-between group cursor-pointer">
+                    <div class="font-bold text-xs text-slate-200 group-hover:text-cyan-300 flex items-center justify-between w-full">
+                      <span>Batch Rename Files</span>
+                      <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                      Write a cross-platform script (Bash and Python) to safely batch-rename all files in a folder matching a pattern...
+                    </p>
+                  </button>
+
+                  <button onclick="sendQuickPrompt('Explain the difference between git reset --soft HEAD~1 and git reset --hard HEAD~1, and show how to safely amend or undo the last local commit.')" class="cyber-card-quick p-4 rounded-2xl flex flex-col justify-between group cursor-pointer">
+                    <div class="font-bold text-xs text-slate-200 group-hover:text-cyan-300 flex items-center justify-between w-full">
+                      <span>Undo Last Git Commit</span>
+                      <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                      Explain the difference between git reset --soft HEAD~1 and git reset --hard HEAD~1, and show how to safely...
+                    </p>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. MOBILE HERO (< 768px: Exact User Snippet Theme) -->
+              <div class="block md:hidden text-center pt-1 pb-2 space-y-4">
+                
+                <!-- Animated Main Metallic Emblem Logo Avatar -->
+                <div class="relative w-24 h-24 mx-auto">
+                  <div class="absolute inset-0 bg-cyan-500/20 rounded-full blur-xl neon-pulse"></div>
+                  <svg class="relative w-24 h-24 rounded-full shadow-2xl shadow-blue-950/80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="chromeRingHero" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#e2e8f0"/>
+                        <stop offset="30%" stop-color="#64748b"/>
+                        <stop offset="50%" stop-color="#cbd5e1"/>
+                        <stop offset="70%" stop-color="#334155"/>
+                        <stop offset="100%" stop-color="#94a3b8"/>
+                      </linearGradient>
+                      <linearGradient id="neonGlowHero" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#06b6d4"/>
+                        <stop offset="50%" stop-color="#3b82f6"/>
+                        <stop offset="100%" stop-color="#a855f7"/>
+                      </linearGradient>
+                      <path id="textArcTopHero" d="M 30 100 A 70 70 0 1 1 170 100" />
+                      <path id="textArcBottomHero" d="M 170 100 A 70 70 0 1 1 30 100" />
+                    </defs>
+                    <circle cx="100" cy="100" r="94" stroke="url(#neonGlowHero)" stroke-width="3"/>
+                    <circle cx="100" cy="100" r="88" stroke="url(#chromeRingHero)" stroke-width="9" fill="#07090e"/>
+                    <circle cx="100" cy="100" r="78" stroke="#1b2438" stroke-width="2" fill="none"/>
+                    
+                    <text font-family="Inter, sans-serif" font-size="10.5" font-weight="800" fill="#e2e8f0" letter-spacing="2.5">
+                      <textPath href="#textArcTopHero" startOffset="50%" text-anchor="middle">DAKSH INTELLIGENCE</textPath>
+                    </text>
+                    <text font-family="Inter, sans-serif" font-size="10.5" font-weight="800" fill="#e2e8f0" letter-spacing="2.5">
+                      <textPath href="#textArcBottomHero" startOffset="50%" text-anchor="middle">DAKSH INTELLIGENCE</textPath>
+                    </text>
+
+                    <circle cx="100" cy="100" r="62" stroke="url(#chromeRingHero)" stroke-width="5" fill="#090d16"/>
+                    <circle cx="100" cy="100" r="57" stroke="#06b6d4" stroke-width="1.5" opacity="0.9" fill="none"/>
+
+                    <polygon points="100,44 144,69 144,121 100,146 56,121 56,69" stroke="url(#chromeRingHero)" stroke-width="4" fill="#0e131f"/>
+                    <polygon points="100,50 138,72 138,118 100,140 62,118 62,72" stroke="url(#neonGlowHero)" stroke-width="1.5" fill="none" opacity="0.7"/>
+
+                    <path d="M 72 73 L 96 73 C 110 73 116 80 116 93 C 116 106 110 113 96 113 L 72 113 Z M 82 82 L 82 104 L 94 104 C 102 104 106 99 106 93 C 106 87 102 82 94 82 Z" fill="url(#chromeRingHero)"/>
+                    <path d="M 112 113 L 125 73 L 138 113 L 127 113 L 125 105 L 115 105 L 113 113 Z M 119 86 L 117 97 L 123 97 Z" fill="url(#chromeRingHero)"/>
+
+                    <text x="100" y="129" font-family="Inter, sans-serif" font-size="7.5" font-weight="800" fill="#06b6d4" text-anchor="middle" letter-spacing="1">DAKSH</text>
+                    <text x="100" y="135" font-family="Inter, sans-serif" font-size="4.5" font-weight="700" fill="#94a3b8" text-anchor="middle" letter-spacing="0.5">INTELLIGENCE</text>
+                  </svg>
+                </div>
+
+                <div class="space-y-1">
+                  <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Welcome to Daksh Intelligence</h2>
+                  <p class="text-xs text-gray-400 font-normal leading-relaxed px-2">
+                    Engineered & Owned by <span class="text-blue-400 font-medium">Daksh Bugalia</span> 
+                  </p>
+                </div>
+
+                <!-- Mode Badge -->
+                <div class="inline-flex items-center gap-2 bg-[#0e131f] border border-cyan-500/30 rounded-full px-3 py-1.5 shadow-sm shadow-cyan-950/30 max-w-full">
+                  <i class="fa-solid fa-bolt text-cyan-400 text-xs shrink-0"></i>
+                  <span class="text-[11px] font-medium text-cyan-300 truncate">Ultra-Fast Answering Mode Active</span>
+                </div>
+
+                <!-- PROMPT SUGGESTIONS GRID (4 Cards: User Snippet Theme) -->
+                <div id="promptCardsGrid" class="grid grid-cols-1 gap-2.5 pt-1 text-left">
+                  <!-- Card 1 -->
+                  <div onclick="selectPrompt('Clean Windows Temp Files', 'Write a safe PowerShell script to calculate and clean up %TEMP% and Windows temp files with logs.')" class="glow-border bg-[#0e131f] p-3.5 rounded-2xl cursor-pointer hover:bg-[#141b2b] transition group relative">
+                    <div class="flex items-start justify-between mb-1">
+                      <h3 class="text-xs font-bold text-white group-hover:text-blue-400 transition flex items-center gap-2">
+                        <i class="fa-solid fa-broom text-blue-400 text-xs"></i>
+                        Clean Windows Temp Files
+                      </h3>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-gray-500 group-hover:text-blue-400 transition"></i>
+                    </div>
+                    <p class="text-[11px] text-gray-400 leading-snug line-clamp-2">
+                      Write a safe PowerShell script to calculate and clean up %TEMP% and Windows temp files with safety logs.
+                    </p>
+                  </div>
+
+                  <!-- Card 2 -->
+                  <div onclick="selectPrompt('Find Top 15 Largest Files', 'Write a PowerShell one-liner or script to scan the current drive or directory and output the top 15 largest files with human-readable sizes.')" class="glow-border bg-[#0e131f] p-3.5 rounded-2xl cursor-pointer hover:bg-[#141b2b] transition group relative">
+                    <div class="flex items-start justify-between mb-1">
+                      <h3 class="text-xs font-bold text-white group-hover:text-blue-400 transition flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart text-blue-400 text-xs"></i>
+                        Find Top 15 Largest Files
+                      </h3>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-gray-500 group-hover:text-blue-400 transition"></i>
+                    </div>
+                    <p class="text-[11px] text-gray-400 leading-snug line-clamp-2">
+                      Write a PowerShell one-liner or script to scan the current drive or directory and output the top 15 largest files...
+                    </p>
+                  </div>
+
+                  <!-- Card 3 -->
+                  <div onclick="selectPrompt('Batch Rename Files', 'Write a cross-platform script (Bash and Python) to safely batch-rename all files in a folder matching a pattern with timestamp prefixes.')" class="glow-border bg-[#0e131f] p-3.5 rounded-2xl cursor-pointer hover:bg-[#141b2b] transition group relative">
+                    <div class="flex items-start justify-between mb-1">
+                      <h3 class="text-xs font-bold text-white group-hover:text-blue-400 transition flex items-center gap-2">
+                        <i class="fa-solid fa-folder-tree text-blue-400 text-xs"></i>
+                        Batch Rename Files
+                      </h3>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-gray-500 group-hover:text-blue-400 transition"></i>
+                    </div>
+                    <p class="text-[11px] text-gray-400 leading-snug line-clamp-2">
+                      Write a cross-platform script (Bash and Python) to safely batch-rename all files in a folder matching...
+                    </p>
+                  </div>
+
+                  <!-- Card 4 -->
+                  <div onclick="selectPrompt('Undo Last Git Commit', 'Explain the difference between git reset --soft HEAD~1 and git reset --hard HEAD~1, and show how to safety undo commits.')" class="glow-border bg-[#0e131f] p-3.5 rounded-2xl cursor-pointer hover:bg-[#141b2b] transition group relative">
+                    <div class="flex items-start justify-between mb-1">
+                      <h3 class="text-xs font-bold text-white group-hover:text-blue-400 transition flex items-center gap-2">
+                        <i class="fa-solid fa-code-commit text-blue-400 text-xs"></i>
+                        Undo Last Git Commit
+                      </h3>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-gray-500 group-hover:text-blue-400 transition"></i>
+                    </div>
+                    <p class="text-[11px] text-gray-400 leading-snug line-clamp-2">
+                      Explain the difference between git reset --soft HEAD~1 and git reset --hard HEAD~1, and show...
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- Messages list -->
+            <div id="messages-list" class="max-w-3xl mx-auto space-y-4 sm:space-y-6 hidden w-full"></div>
+            <div id="messages-anchor"></div>
+          </div>
+
+          <!-- ================= BOTTOM CHAT INPUT (Dual PC & Mobile Mode) ================= -->
+          
+          <!-- 1. PC Desktop Extruded Input Capsule (>= 768px: Picture 2) -->
+          <div class="hidden md:block p-4 bg-gradient-to-t from-[#040711] via-[#040711]/90 to-transparent shrink-0">
+            <div class="max-w-3xl mx-auto">
+              <div id="attachment-preview" class="hidden mb-2 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-cyan-300 flex items-center justify-between">
+                <span id="attachment-name" class="truncate"></span>
+                <button onclick="removeAttachment()" class="text-slate-400 hover:text-rose-400 ml-2 cursor-pointer">&times;</button>
+              </div>
+
+              <!-- Capsule Container (Pic 2) -->
+              <div class="cyber-input-capsule rounded-full px-4 py-2.5 flex items-center gap-2.5 transition-all">
+                <input type="file" id="file-upload-input" class="hidden" onchange="handleFileUpload(event)">
+                <button onclick="document.getElementById('file-upload-input').click()" class="p-2 text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer" title="Attach file or screenshot">
+                  <i data-lucide="paperclip" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Voice Dictation Mic -->
+                <button onclick="toggleMicrophone()" id="mic-btn" class="p-2 text-slate-400 hover:text-cyan-300 transition-all cursor-pointer" title="Voice Dictation">
+                  <i data-lucide="mic" class="w-4 h-4"></i>
+                </button>
+
+                <textarea id="chat-input" rows="1" placeholder="Ask Daksh Intelligence anything... (Shift+Enter for new line)" class="flex-1 bg-transparent text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none resize-none py-1 max-h-32 leading-relaxed" onkeydown="handleInputKeydown(event)"></textarea>
+
+                <!-- Stop Generating Button -->
+                <button onclick="stopGeneration()" id="stop-gen-btn" class="hidden px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-full text-xs font-semibold flex items-center gap-1 transition-all shadow-sm shadow-rose-500/20 shrink-0 cursor-pointer">
+                  <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
+                  <span>Stop</span>
+                </button>
+
+                <!-- Send Button with Cyan Halo (Pic 2) -->
+                <button onclick="sendMessage()" id="send-btn" class="w-8 h-8 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition-all shadow-md shadow-indigo-600/40 shrink-0 cursor-pointer group active:scale-95" title="Send message">
+                  <i data-lucide="arrow-up" class="w-4 h-4 text-white group-hover:-translate-y-0.5 transition-transform"></i>
+                </button>
+              </div>
+
+              <p class="text-[10px] text-center text-slate-500 mt-2">Daksh Intelligence may generate mistakes · Fast Answering active</p>
+            </div>
+          </div>
+
+          <!-- 2. Mobile Interactive Chat Input Bar (< 768px: Exact User Snippet Theme) -->
+          <div class="block md:hidden p-3 bg-[#07090e] border-t border-[#1b2438] shrink-0">
+            <!-- Mobile Attachment Badge Preview -->
+            <div id="mobile-attachment-preview" class="hidden mb-2 px-3 py-1.5 bg-[#0e131f] border border-blue-500/40 rounded-xl flex items-center justify-between text-xs text-blue-300">
+              <span class="flex items-center gap-2 truncate"><i class="fa-solid fa-paperclip text-blue-400"></i> <span id="mobile-attachment-name" class="truncate">file.txt</span></span>
+              <button onclick="removeAttachment()" class="text-gray-400 hover:text-white p-1 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Form Container -->
+            <form onsubmit="handleMobileSubmit(event)" class="relative flex items-center bg-[#0e131f] border border-[#1b2438] focus-within:border-blue-500/60 rounded-2xl p-1.5 shadow-lg transition">
+              <!-- Attachment Button -->
+              <button type="button" onclick="document.getElementById('file-upload-input').click()" class="p-2 text-gray-400 hover:text-blue-400 rounded-xl transition hover:bg-[#182033] cursor-pointer" title="Attach File">
+                <i class="fa-solid fa-paperclip text-sm"></i>
+              </button>
+
+              <!-- Voice Dictation Toggle Button -->
+              <button type="button" id="mobile-mic-btn" onclick="toggleMicrophone()" class="p-2 text-gray-400 hover:text-cyan-400 rounded-xl transition hover:bg-[#182033] cursor-pointer" title="Voice Dictation">
+                <i class="fa-solid fa-microphone text-sm"></i>
+              </button>
+
+              <!-- Input Text Field -->
+              <input 
+                type="text" 
+                id="mobile-chat-input"
+                placeholder="Ask Daksh Intelligence anything..." 
+                class="w-full bg-transparent text-xs text-white placeholder-gray-500 px-2 py-2 focus:outline-none"
+                autocomplete="off"
+                onkeydown="handleMobileInputKeydown(event)"
+              />
+
+              <!-- Send Button -->
+              <button 
+                type="submit" 
+                id="mobile-send-btn"
+                class="p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition shadow-md shadow-blue-600/30 flex items-center justify-center active:scale-90 cursor-pointer shrink-0"
+              >
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+              </button>
+            </form>
+            <p class="text-[10px] text-center text-gray-500 mt-2">Daksh Intelligence</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: KNOWLEDGE BASE VIEW -->
+      <section id="view-knowledge" class="flex-1 overflow-y-auto p-4 sm:p-6 max-w-5xl mx-auto w-full hidden">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">Ingested Knowledge Base</h2>
+            <p class="text-xs text-slate-400 mt-1">Ingest web URLs and documentation. The AI assistant grounds answers directly using these documents.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="cyber-panel rounded-2xl p-5 space-y-4">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+              <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
+              <span>Ingest Web Page URL</span>
+            </h3>
+            <div class="flex gap-2">
+              <input type="url" id="kb-url-input" placeholder="https://example.com/docs" class="flex-1 bg-[#050914] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50">
+              <button onclick="ingestUrl()" id="btn-ingest-url" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-cyan-600/20 whitespace-nowrap cursor-pointer">Ingest</button>
+            </div>
+            <div id="kb-ingest-status" class="text-xs text-slate-400 hidden"></div>
+          </div>
+
+          <div class="cyber-panel rounded-2xl p-5 space-y-4">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+              <i data-lucide="file-plus" class="w-4 h-4 text-indigo-400"></i>
+              <span>Add Custom Document</span>
+            </h3>
+            <input type="text" id="kb-doc-title" placeholder="Document title" class="w-full bg-[#050914] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/50">
+            <textarea id="kb-doc-content" rows="2" placeholder="Paste custom knowledge or documentation text..." class="w-full bg-[#050914] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 resize-none"></textarea>
+            <button onclick="addManualDoc()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg cursor-pointer">Add Document</button>
+          </div>
+        </div>
+
+        <div id="kb-documents-list" class="space-y-3"></div>
+      </section>
+
+    </main>
+  </div><!-- ================= 3. AI ASSISTANT SETTINGS & PROFILE MODAL ================= -->
+  <div id="modal-settings-hub" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+    <div class="w-full max-w-sm sm:max-w-md bg-[#070d18] border border-cyan-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 my-auto relative ring-1 ring-cyan-500/20">
+      
+      <button onclick="closeSettingsHub()" class="absolute right-4 top-4 text-slate-400 hover:text-cyan-300 transition-colors p-1 rounded-full hover:bg-slate-800/60 text-lg cursor-pointer">&times;</button>
+
+      <div class="flex flex-col items-center text-center space-y-2 pt-1">
+        <div class="relative group">
+          <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-70 blur-md animate-pulse"></div>
+          <img
+            src="assets/daksh-logo.png"
+            alt="Daksh Intelligence Logo"
+            class="relative w-16 h-16 rounded-full object-cover border-2 border-cyan-400/60 shadow-xl"
+          />
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-wide">AI Assistant Settings</h2>
+          <p class="text-[11px] text-cyan-400/90 font-mono -mt-0.5">Daksh Intelligence · Personal Copilot</p>
+        </div>
+      </div>
+
+      <!-- User Profile Card -->
+      <div onclick="openHubSection('account')" class="p-3 bg-[#0c1424] hover:bg-[#101b30] border border-cyan-900/50 rounded-2xl flex items-center justify-between gap-3 shadow-inner cursor-pointer transition-colors group">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="hub-user-avatar" class="w-10 h-10 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 flex items-center justify-center font-bold text-sm shrink-0">
+            <i data-lucide="user" class="w-5 h-5 text-cyan-400"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-semibold text-white truncate flex items-center gap-1.5">
+              <span>User Profile</span>
+              <span id="hub-role-badge" class="text-[9px] px-1.5 py-0.2 rounded font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Owner</span>
+            </div>
+            <p id="hub-username-label" class="text-[11px] text-slate-400 truncate">dakshbugalia1@gmail.com</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-950/70 border border-emerald-800/40 rounded-full text-[11px] text-emerald-400 font-medium shrink-0">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Online</span>
+        </div>
+      </div>
+
+      <!-- MAIN MENU LIST -->
+      <div id="hub-main-menu" class="border border-cyan-500/40 bg-[#08101d]/90 rounded-2xl divide-y divide-slate-800/80 overflow-hidden shadow-lg">
+        
+        <button onclick="openInstallModal()" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/30 transition-colors group cursor-pointer bg-gradient-to-r from-cyan-950/20 to-indigo-950/20">
+          <div class="flex items-center gap-3">
+            <i data-lucide="download-cloud" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-semibold text-cyan-200 group-hover:text-cyan-100">Install App (Android APK & PC)</span>
+          </div>
+          <span class="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">Free</span>
+        </button>
+
+        <button onclick="openHubSection('voice')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/20 transition-colors group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <i data-lucide="mic" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-300">Voice Settings</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+        </button>
+
+        <button onclick="openHubSection('notifications')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/20 transition-colors group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <i data-lucide="bell" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-300">Notification Preferences</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+        </button>
+
+        <button onclick="openHubSection('language')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/20 transition-colors group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <i data-lucide="globe" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-300">Language</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+        </button>
+
+        <button onclick="openHubSection('privacy')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/20 transition-colors group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <i data-lucide="shield" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-300">Privacy & Security</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+        </button>
+
+        <button onclick="openHubSection('account')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/20 transition-colors group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <i data-lucide="user" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-300">Account & Storage Vault</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+        </button>
+
+        <button onclick="openHubSection('model')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/20 transition-colors group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <i data-lucide="cpu" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-300">AI Model & Intelligence</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+        </button>
+
+        <button onclick="openHubSection('devices')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-cyan-950/20 transition-colors group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <i data-lucide="monitor" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-300">Connected Devices & Telemetry</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+        </button>
+      </div>
+
+      <!-- SUB-SECTION: VOICE SETTINGS -->
+      <div id="hub-section-voice" class="hidden space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <button onclick="showHubMainMenu()" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Back to Settings</span>
+          </button>
+          <span class="font-bold text-white">Voice Settings</span>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-200 font-medium">Auto-Speak Responses</span>
+              <input type="checkbox" id="setting-auto-speak" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 cursor-pointer">
+            </div>
+            <p class="text-[11px] text-slate-400">Automatically read Gemini responses aloud using speech synthesis.</p>
+          </div>
+
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <label class="block text-slate-200 font-medium">AI Voice Persona</label>
+            <select id="setting-voice-model" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white focus:outline-none">
+              <option value="Kore">Kore (Clear & Natural)</option>
+              <option value="Puck">Puck (Dynamic & Energetic)</option>
+              <option value="Fenrir">Fenrir (Deep & Resonant)</option>
+              <option value="Aoede">Aoede (Soft & Melodic)</option>
+            </select>
+          </div>
+
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <div class="flex justify-between text-slate-300">
+              <span>Speech Speed Rate</span>
+              <span id="voice-speed-val" class="font-mono text-cyan-400">1.0x</span>
+            </div>
+            <input type="range" id="setting-voice-rate" min="0.7" max="1.5" step="0.1" value="1.0" oninput="document.getElementById('voice-speed-val').innerText = this.value + 'x'" class="w-full">
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-SECTION: AI MODEL & INTELLIGENCE -->
+      <div id="hub-section-model" class="hidden space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <button onclick="showHubMainMenu()" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Back to Settings</span>
+          </button>
+          <span class="font-bold text-white">AI Model & Copilot</span>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <label class="block text-slate-200 font-medium">AI Model Engine</label>
+            <select id="setting-ai-model" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white focus:outline-none">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default · Ultra-Fast)</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Stable Workhorse)</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Experimental Preview)</option>
+            </select>
+          </div>
+
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <label class="block text-slate-200 font-medium">Assistant Persona</label>
+            <select id="setting-persona" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white focus:outline-none">
+              <option value="daksh-core">Daksh Intelligence (Core Copilot)</option>
+              <option value="code-architect">Nexus Architect (Dev & Debugger)</option>
+              <option value="terminal-guru">Terminal Guru (PowerShell & Shell)</option>
+              <option value="executive-planner">Echo Executive (Productivity)</option>
+            </select>
+          </div>
+
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <div class="flex justify-between text-slate-300">
+              <span>Creativity / Temperature</span>
+              <span id="temp-val" class="font-mono text-cyan-400">0.7</span>
+            </div>
+            <input type="range" id="setting-temperature" min="0" max="1.4" step="0.05" value="0.7" oninput="document.getElementById('temp-val').innerText = this.value" class="w-full">
+            <p class="text-[10px] text-slate-400">Lower = focused & deterministic. Higher = creative & brainstorming.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-SECTION: NOTIFICATION PREFERENCES -->
+      <div id="hub-section-notifications" class="hidden space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <button onclick="showHubMainMenu()" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Back to Settings</span>
+          </button>
+          <span class="font-bold text-white">Notifications</span>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl flex items-center justify-between">
+            <div>
+              <div class="text-slate-200 font-medium">Sound Alert on Reply</div>
+              <p class="text-[10px] text-slate-400">Play subtle chime when AI finishes generating.</p>
+            </div>
+            <input type="checkbox" id="setting-reply-sound" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 cursor-pointer">
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-SECTION: LANGUAGE -->
+      <div id="hub-section-language" class="hidden space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <button onclick="showHubMainMenu()" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Back to Settings</span>
+          </button>
+          <span class="font-bold text-white">Language & Region</span>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <label class="block text-slate-200 font-medium">Primary Assistant Language</label>
+            <select id="setting-language" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white focus:outline-none">
+              <option value="en">English (US / Global)</option>
+              <option value="hi">Hindi (हिंदी)</option>
+              <option value="es">Spanish (Español)</option>
+              <option value="fr">French (Français)</option>
+              <option value="de">German (Deutsch)</option>
+              <option value="ja">Japanese (日本語)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-SECTION: PRIVACY & SECURITY -->
+      <div id="hub-section-privacy" class="hidden space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <button onclick="showHubMainMenu()" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Back to Settings</span>
+          </button>
+          <span class="font-bold text-white">Privacy & Security</span>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <label class="block text-slate-200 font-medium">Gemini API Key (Optional Override)</label>
+            <input type="password" id="setting-api-key" placeholder="AIzaSy... (Leave empty to use server cloud key)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+            <p class="text-[10px] text-slate-400">Your key is kept safe and never shared with other users.</p>
+          </div>
+
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-1">
+            <div class="text-slate-200 font-medium">Master Owner Security</div>
+            <p class="text-[11px] text-slate-400">Owner account is password protected. Unauthorized users cannot access administrative settings.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-SECTION: CONNECTED DEVICES & TELEMETRY -->
+      <div id="hub-section-devices" class="hidden space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <button onclick="showHubMainMenu()" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Back to Settings</span>
+          </button>
+          <span class="font-bold text-white">Hardware & Telemetry</span>
+        </div>
+
+        <div class="space-y-2">
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="font-medium text-white flex items-center gap-2">
+                <i data-lucide="monitor" class="w-4 h-4 text-cyan-400"></i>
+                <span id="telemetry-os-name">Windows 11 PC</span>
+              </div>
+              <span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-1.5 py-0.5 rounded font-mono">Current Device</span>
+            </div>
+            <div class="text-[11px] text-slate-400">
+              Host: <code id="telemetry-host-name" class="text-slate-300">localhost:3000</code>
+            </div>
+            <div class="text-[10px] text-slate-500 flex items-center gap-2">
+              <span id="telemetry-screen-res">Screen: 1920x1080</span>
+              <span>·</span>
+              <span id="telemetry-cores">16 Cores</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-SECTION: ACCOUNT & STORAGE VAULT -->
+      <div id="hub-section-account" class="hidden space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <button onclick="showHubMainMenu()" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Back to Settings</span>
+          </button>
+          <span class="font-bold text-white">Account & Vault</span>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300">Name</span>
+              <span id="hub-acc-name" class="text-white font-semibold">Daksh Bugalia</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300">Email</span>
+              <span id="hub-acc-email" class="text-slate-400 font-mono">dakshbugalia1@gmail.com</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300">Conversations</span>
+              <span id="hub-acc-conv-count" class="text-cyan-400 font-mono">1</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button onclick="exportConversationsJSON()" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 rounded-lg text-center transition-colors cursor-pointer">
+              Export Chats (JSON)
+            </button>
+            <button onclick="exportConversationsMarkdown()" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 rounded-lg text-center transition-colors cursor-pointer">
+              Export (Markdown)
+            </button>
+          </div>
+
+          <button onclick="handleLogout()" class="w-full py-2.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800 text-rose-300 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>Log Out of Workstation</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Save / Close Bar -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+        <button onclick="closeSettingsHub()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium rounded-xl transition-colors cursor-pointer">
+          Close
+        </button>
+        <button onclick="saveAllSettings()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-cyan-600/30 transition-all flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>Save & Apply</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Command Palette Modal (Ctrl+K) -->
+  <div id="modal-quick-actions" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-20 hidden">
+    <div class="bg-[#0b1322] border border-cyan-500/40 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden space-y-0">
+      <div class="p-3 border-b border-slate-800 flex items-center gap-2">
+        <i data-lucide="search" class="w-4 h-4 text-cyan-400"></i>
+        <input
+          type="text"
+          id="cmd-palette-input"
+          oninput="filterQuickActions()"
+          placeholder="Search PC actions, scripts, tools... (Esc to close)"
+          class="flex-1 bg-transparent text-sm text-white focus:outline-none placeholder-slate-500"
+        />
+        <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-400 font-mono">Esc</kbd>
+      </div>
+      <div id="cmd-palette-list" class="max-h-80 overflow-y-auto p-2 space-y-1 text-xs"></div>
+    </div>
+  </div>
+
+  <!-- INSTALL APP MODAL (ANDROID APK & PC DESKTOP) -->
+  <div id="modal-install-app" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+    <div class="w-full max-w-lg bg-[#070d18] border border-cyan-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 my-auto relative ring-1 ring-cyan-500/20">
+      
+      <button onclick="closeInstallModal()" class="absolute right-4 top-4 text-slate-400 hover:text-cyan-300 transition-colors p-1 rounded-full hover:bg-slate-800/60 text-lg cursor-pointer">&times;</button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-indigo-600/30 border border-cyan-500/40 flex items-center justify-center shadow-lg shrink-0">
+          <img src="assets/daksh-logo.png" alt="Logo" class="w-9 h-9 rounded-xl object-cover" />
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-white tracking-wide">Install Daksh Intelligence</h2>
+          <p class="text-xs text-slate-400">Install on Android Mobile without Play Store or on Windows PC</p>
+        </div>
+      </div>
+
+      <!-- Tab Switcher: Android vs PC -->
+      <div class="grid grid-cols-2 gap-2 bg-[#09101f] p-1 rounded-xl border border-slate-800">
+        <button id="install-tab-android" onclick="switchInstallTab('android')" class="py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md cursor-pointer">
+          <i data-lucide="smartphone" class="w-4 h-4"></i>
+          <span>Android Mobile</span>
+        </button>
+        <button id="install-tab-pc" onclick="switchInstallTab('pc')" class="py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer">
+          <i data-lucide="monitor" class="w-4 h-4"></i>
+          <span>Windows PC</span>
+        </button>
+      </div>
+
+      <!-- ANDROID CONTENT -->
+      <div id="install-content-android" class="space-y-3">
+        <!-- Official Direct APK Download Card -->
+        <div class="p-4 bg-gradient-to-r from-emerald-950/90 to-cyan-950/90 border border-emerald-500/50 rounded-2xl space-y-2.5 shadow-xl">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+              Official Android APK Ready!
+            </span>
+            <span class="text-[10px] text-emerald-200 bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 rounded-full font-mono">32 MB APK</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Download the official <strong>Daksh Intelligence APK</strong> directly to your phone. No Google Play Store required!
+          </p>
+          <a href="/Daksh_Intelligence_apk.apk" download="Daksh_Intelligence.apk" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-emerald-600/40 transition-all cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Download Official APK (Direct Download - 32MB)</span>
+          </a>
+          <ol class="text-[11px] text-slate-400 space-y-1 list-decimal list-inside pl-1 bg-[#060a14]/60 p-2 rounded-xl">
+            <li>Tap the button above to download the file.</li>
+            <li>Tap <strong>Daksh_Intelligence.apk</strong> in your notifications or Downloads.</li>
+            <li>Tap <strong>Install</strong> (if asked, allow 'Install unknown apps').</li>
+          </ol>
+        </div>
+
+        <!-- Method 2: Instant Chrome Install (PWA) -->
+        <div class="p-3 bg-[#0b1325] border border-cyan-900/60 rounded-2xl space-y-2">
+          <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+            <i data-lucide="chrome" class="w-3.5 h-3.5 text-cyan-400"></i>
+            Alternative: 1-Tap Browser Install (Chrome on Android)
+          </span>
+          <p class="text-xs text-slate-300">
+            Open in Chrome &rarr; tap Chrome menu (3 dots) &rarr; tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- PC CONTENT -->
+      <div id="install-content-pc" class="space-y-3 hidden">
+        <!-- 1-Click Desktop Installer -->
+        <div class="p-4 bg-gradient-to-r from-cyan-950/90 to-indigo-950/90 border border-cyan-500/50 rounded-2xl space-y-3 shadow-xl">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+              <i data-lucide="monitor" class="w-4 h-4 text-cyan-400"></i>
+              PC Desktop App (Windows 1-Click Installer)
+            </span>
+            <span class="text-[10px] text-cyan-200 bg-cyan-500/20 border border-cyan-500/40 px-2 py-0.5 rounded-full font-mono">1-Click</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Agar browser se install nahi ho raha, toh ye installer download karke run karein. Ye direct aapke Windows Desktop par 'Daksh Intelligence' app bana dega:
+          </p>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <a href="/Install_PC_App.vbs" download="Install_PC_App.vbs" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer">
+              <i data-lucide="play" class="w-3.5 h-3.5"></i>
+              <span>Download Installer (.vbs) - Best</span>
+            </a>
+            <a href="/Create_PC_Desktop_App.bat" download="Create_PC_Desktop_App.bat" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-[#11192e] hover:bg-[#182340] border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+              <i data-lucide="terminal" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Download Batch (.bat)</span>
+            </a>
+          </div>
+          <div class="text-[11px] text-slate-400 space-y-1 bg-[#060a14]/60 p-2.5 rounded-xl border border-slate-800">
+            <p class="font-semibold text-slate-300">PC pe install karne ka tareeqa:</p>
+            <ol class="list-decimal list-inside space-y-0.5 pl-1">
+              <li>Upar diye gaye <strong>Install_PC_App.vbs</strong> par click karein (ya apne project folder me double-click karein).</li>
+              <li>Aapke Windows Desktop par <strong>Daksh Intelligence</strong> ka icon ban jayega!</li>
+              <li>Agar .bat run karte waqt 'Windows protected your PC' dikhaye, toh <strong>More info</strong> &rarr; <strong>Run anyway</strong> par click karein.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Method 2: Browser Install (Edge/Chrome) -->
+        <div class="p-3 bg-[#0b1325] border border-slate-800 rounded-2xl space-y-1.5">
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-400"></i>
+            Browser PWA Install Note
+          </span>
+          <p class="text-[11px] text-slate-400">
+            Browser URL bar me Install button tabhi aayega jab aap GitHub par latest files (<code class="text-cyan-300">manifest.json</code>, <code class="text-cyan-300">sw.js</code>) upload karke Render deploy karenge.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end pt-2">
+        <button onclick="closeInstallModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  </main>
+
+
+<div id="settingsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <section class="modal-card glass settings-card">
+      <button id="closeSettings" class="close-modal" aria-label="Close">×</button>
+      <div class="eyebrow">PERSONALISE YOUR WORKSPACE</div>
+      <h2 id="settingsTitle">Account settings</h2>
+      <div class="profile-editor">
+        <img id="profilePreview" class="profile-preview" src="assets/daksh-logo.png" alt="Profile picture">
+        <div class="profile-edit-actions">
+          <strong id="settingsEmail">Your account</strong>
+          <label class="upload-photo-btn" for="profileFile">Choose profile picture</label>
+          <input id="profileFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          <small>PNG, JPG or WebP · up to 2 MB</small>
+        </div>
+      </div>
+      <form id="settingsForm">
+        <label for="settingsName">Display name</label>
+        <input id="settingsName" type="text" maxlength="60" required placeholder="Your name">
+        <label for="settingsPhotoUrl">Profile picture URL (optional)</label>
+        <input id="settingsPhotoUrl" type="url" placeholder="https://example.com/photo.jpg">
+        <button class="primary-btn" type="submit">Save account settings <span>↗</span></button>
+      </form>
+      <button id="changePassword" class="secondary-btn" type="button">Send password reset email</button>
+      <div id="settingsMessage" class="auth-message" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <div id="appModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <section class="modal-card glass">
+      <button id="closeModal" class="close-modal" aria-label="Close">×</button>
+      <div class="modal-symbol" id="modalSymbol">✳</div>
+      <div class="eyebrow">WORKSPACE SELECTED</div>
+      <h2 id="modalTitle">AI Chat</h2>
+      <p id="modalDescription">This is the interface preview. The selected app can be connected to its real features next.</p>
+      <div class="modal-notice"><span class="status-dot"></span> Front-end prototype · app functionality not connected yet</div>
+      <button id="backHome" class="primary-btn">Back to workspace <span>↗</span></button>
+    </section>
+  </div>
+  
+  <!-- ================= 4. AI CHAT ENGINE SCRIPTS ================= -->
+  <script>
+    const OWNER_EMAILS = ['dakshbugalia1@gmail.com', 'dakshbugalia1@gamil.com'];
+
+    // ================= SIDEBAR OPEN / CLOSE ROUTINE (PC & MOBILE) =================
+    let isSidebarOpen = window.innerWidth >= 768;
+
+    function toggleSidebar(forceState) {
+      if (forceState !== undefined) {
+        isSidebarOpen = forceState;
+      } else {
+        isSidebarOpen = !isSidebarOpen;
+      }
+      applySidebarState();
+    }
+
+    function applySidebarState() {
+      const desktopSidebar = document.getElementById('chat-sidebar');
+      const mobileDrawer = document.getElementById('sidebarDrawer');
+      const mobileBackdrop = document.getElementById('drawerBackdrop');
+      const toggleIcon = document.getElementById('sidebar-toggle-icon');
+
+      const isMobile = window.innerWidth < 768;
+
+      if (isMobile) {
+        // Mobile Drawer behavior
+        if (mobileDrawer) {
+          if (isSidebarOpen) {
+            mobileDrawer.classList.remove('-translate-x-full');
+            mobileDrawer.classList.add('translate-x-0');
+            if (mobileBackdrop) {
+              mobileBackdrop.classList.remove('hidden');
+              mobileBackdrop.classList.remove('opacity-0');
+            }
+          } else {
+            mobileDrawer.classList.remove('translate-x-0');
+            mobileDrawer.classList.add('-translate-x-full');
+            if (mobileBackdrop) {
+              mobileBackdrop.classList.add('opacity-0');
+              mobileBackdrop.classList.add('hidden');
+            }
+          }
+        }
+        if (desktopSidebar) {
+          desktopSidebar.style.display = 'none';
+        }
+      } else {
+        // Desktop PC behavior
+        if (mobileDrawer) {
+          mobileDrawer.classList.remove('translate-x-0');
+          mobileDrawer.classList.add('-translate-x-full');
+        }
+        if (mobileBackdrop) {
+          mobileBackdrop.classList.add('hidden', 'opacity-0');
+        }
+
+        if (desktopSidebar) {
+          desktopSidebar.style.display = isSidebarOpen ? 'flex' : 'none';
+        }
+      }
+
+      if (toggleIcon) {
+        toggleIcon.setAttribute('data-lucide', isSidebarOpen ? 'panel-left-close' : 'panel-left');
+        lucide.createIcons();
+      }
+    }
+
+    // Window resize handler
+    window.addEventListener('resize', () => {
+      applySidebarState();
+    });
+
+    // Keyboard shortcut Ctrl+B or Cmd+B to toggle sidebar
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    });
+
+    // ================= PWA & INSTALL ROUTINE =================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('SW registration skipped:', err);
+        });
+      });
+    }
+
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function handleAppInstallClick() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+        });
+      } else {
+        openInstallModal();
+      }
+    }
+
+    function openInstallModal() {
+      const modal = document.getElementById('modal-install-app');
+      if (modal) {
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    function closeInstallModal() {
+      const modal = document.getElementById('modal-install-app');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchInstallTab(tab) {
+      const btnAndroid = document.getElementById('install-tab-android');
+      const btnPc = document.getElementById('install-tab-pc');
+      const contentAndroid = document.getElementById('install-content-android');
+      const contentPc = document.getElementById('install-content-pc');
+
+      if (tab === 'android') {
+        btnAndroid.className = 'py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md cursor-pointer';
+        btnPc.className = 'py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer';
+        contentAndroid.classList.remove('hidden');
+        contentPc.classList.add('hidden');
+      } else {
+        btnPc.className = 'py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md cursor-pointer';
+        btnAndroid.className = 'py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer';
+        contentPc.classList.remove('hidden');
+        contentAndroid.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // State
+    let authState = {
+      mode: 'signin',
+      showPassword: false,
+    };
+
+    let currentUser = null;
+    let currentAbortController = null;
+    let speechRecognition = null;
+    let isListening = false;
+
+    let appState = {
+      apiKey: localStorage.getItem('GEMINI_API_KEY') || '',
+      aiModel: localStorage.getItem('AI_MODEL') || 'gemini-2.5-flash',
+      persona: localStorage.getItem('AI_PERSONA') || 'daksh-core',
+      temperature: parseFloat(localStorage.getItem('AI_TEMP') || '0.7'),
+      autoSpeak: localStorage.getItem('AUTO_SPEAK') === 'true',
+      voiceModel: localStorage.getItem('VOICE_MODEL') || 'Kore',
+      voiceRate: parseFloat(localStorage.getItem('VOICE_RATE') || '1.0'),
+      conversations: [],
+      activeConversationId: '',
+      knowledgeDocs: [],
+      currentAttachment: null,
+      isGenerating: false,
+    };
+
+    const QUICK_ACTIONS_DATA = [
+      { id: 'ps-temp', title: 'Clean Windows Temp Files', cat: 'system', prompt: 'Write a safe PowerShell script to calculate and clean up %TEMP% and Windows temp files with administrator elevation check.' },
+      { id: 'ps-files', title: 'Find Top 15 Largest Files', cat: 'system', prompt: 'Write a PowerShell one-liner or script to scan the current drive or directory and output the top 15 largest files formatted in MB/GB.' },
+      { id: 'bash-rename', title: 'Batch Rename Files', cat: 'script', prompt: 'Write a cross-platform script (Bash and Python) to safely batch-rename all files in a folder matching a pattern, adding an incremental counter and creation date.' },
+      { id: 'git-undo', title: 'Undo Last Git Commit', cat: 'git', prompt: 'Explain the difference between git reset --soft HEAD~1 and git reset --hard HEAD~1, and show how to safely amend or undo the last local commit.' },
+      { id: 'kill-port', title: 'Kill Process Holding Port 3000', cat: 'system', prompt: 'Show how to find the process ID (PID) holding port 3000 on both Windows (netstat / Stop-Process) and Linux/macOS (lsof / kill), then terminate it.' },
+      { id: 'notes', title: 'Condense Meeting Notes', cat: 'writing', prompt: 'Format and condense these notes into: 1. Executive Summary, 2. Key Decisions Made, 3. Immediate Action Items (Who & What), 4. Open Questions.' },
+      { id: 'regex', title: 'Regex for Data Extraction', cat: 'dev', prompt: 'Provide regular expressions with full explanations for: 1. RFC-compliant Email, 2. IPv4 address, 3. ISO 8601 Datetime, 4. Semantic Versioning string.' },
+    ];
+
+    // Initialize on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-enter workstation on app start so user is never blocked by login phase
+      let sessionUser = null;
+      try {
+        const saved = localStorage.getItem('daksh_auth_session');
+        if (saved) {
+          sessionUser = JSON.parse(saved);
+        }
+      } catch (e) {}
+
+      if (!sessionUser || !sessionUser.email) {
+        sessionUser = {
+          id: 'usr-daksh-owner',
+          name: 'Daksh Bugalia',
+          email: 'dakshbugalia1@gmail.com',
+          role: 'Owner & System Administrator',
+          isOwner: true,
+          isGuest: false,
+          authProvider: 'google',
+        };
+        localStorage.setItem('daksh_auth_session', JSON.stringify(sessionUser));
+      }
+
+      loginUser(sessionUser, true);
+      applySidebarState();
+      lucide.createIcons();
+    });
+
+    function showLoginScreen() {
+      const vl = document.getElementById('view-login') || document.getElementById('loginScreen');
+      if (vl) vl.classList.remove('hidden');
+      const aml = document.getElementById('app-main-layout');
+      if (aml) aml.classList.add('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function isOwnerUser(email) {
+      if (!email) return false;
+      return OWNER_EMAILS.includes(email.toLowerCase().trim());
+    }
+
+    function setAuthMode(mode) {
+      authState.mode = mode;
+      const isSignup = mode === 'signup';
+      document.getElementById('signup-name-container').classList.toggle('hidden', !isSignup);
+      document.getElementById('btn-auth-text').innerText = isSignup ? 'Create Workstation Account' : 'Sign In to Workstation';
+
+      if (isSignup) {
+        document.getElementById('btn-login-tab-signup').className = 'flex-1 py-1.5 rounded-lg font-medium transition-all text-center bg-gradient-to-r from-indigo-600/40 to-cyan-600/40 border border-cyan-500/40 text-white shadow-sm';
+        document.getElementById('btn-login-tab-signin').className = 'flex-1 py-1.5 rounded-lg font-medium transition-colors text-center text-slate-400 hover:text-white';
+      } else {
+        document.getElementById('btn-login-tab-signin').className = 'flex-1 py-1.5 rounded-lg font-medium transition-all text-center bg-gradient-to-r from-indigo-600/40 to-cyan-600/40 border border-cyan-500/40 text-white shadow-sm';
+        document.getElementById('btn-login-tab-signup').className = 'flex-1 py-1.5 rounded-lg font-medium transition-colors text-center text-slate-400 hover:text-white';
+      }
+    }
+
+    function togglePasswordVisibility() {
+      authState.showPassword = !authState.showPassword;
+      const input = document.getElementById('input-auth-password');
+      input.type = authState.showPassword ? 'text' : 'password';
+      const eyeIcon = document.getElementById('eye-icon');
+      eyeIcon.setAttribute('data-lucide', authState.showPassword ? 'eye-off' : 'eye');
+      lucide.createIcons();
+    }
+
+    // ================= AUTHENTIC GOOGLE "CHOOSE AN ACCOUNT" CONTROLLER =================
+    let isGoogleRemoveMode = false;
+    let selectedGoogleAccount = null;
+
+    function getDeviceGoogleAccounts() {
+      const defaultAccounts = [
+        {
+          name: "Daksh Bugalia",
+          email: "dakshbugalia1@gmail.com",
+          avatar: "/logo.jpg",
+          isOwner: true,
+          status: "Signed out"
+        }
+      ];
+      try {
+        const saved = localStorage.getItem('daksh_device_google_accounts');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Ensure owner account is present
+            if (!parsed.some(a => a.email.toLowerCase() === 'dakshbugalia1@gmail.com')) {
+              parsed.unshift(defaultAccounts[0]);
+            }
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error('Error reading device google accounts:', e);
+      }
+      return defaultAccounts;
+    }
+
+    function saveDeviceGoogleAccounts(accounts) {
+      try {
+        localStorage.setItem('daksh_device_google_accounts', JSON.stringify(accounts));
+      } catch (e) {
+        console.error('Error saving device google accounts:', e);
+      }
+    }
+
+    function addAccountToDevice(account) {
+      const accounts = getDeviceGoogleAccounts();
+      const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === account.email.toLowerCase());
+      if (existingIdx !== -1) {
+        accounts[existingIdx] = { ...accounts[existingIdx], ...account };
+      } else {
+        accounts.push(account);
+      }
+      saveDeviceGoogleAccounts(accounts);
+    }
+
+    function removeAccountFromDevice(email) {
+      let accounts = getDeviceGoogleAccounts();
+      accounts = accounts.filter(a => a.email.toLowerCase() !== email.toLowerCase());
+      if (accounts.length === 0) {
+        accounts = [
+          {
+            name: "Daksh Bugalia",
+            email: "dakshbugalia1@gmail.com",
+            avatar: "/logo.jpg",
+            isOwner: true,
+            status: "Signed out"
+          }
+        ];
+      }
+      saveDeviceGoogleAccounts(accounts);
+      renderGoogleAccountsList();
+    }
+
+    function renderGoogleAccountsList() {
+      const container = document.getElementById('google-accounts-container');
+      if (!container) return;
+
+      const accounts = getDeviceGoogleAccounts();
+
+      container.innerHTML = accounts.map((acc, idx) => {
+        const isFirst = idx === 0;
+        const initial = (acc.name || acc.email || 'U')[0].toUpperCase();
+        const avatarHtml = acc.avatar ? 
+          `<img src="${acc.avatar}" class="w-full h-full object-cover">` : 
+          `<div class="w-full h-full flex items-center justify-center bg-[#1e8e3e] text-white font-medium text-xs">${initial}</div>`;
+
+        // The first account gets the exact soft-blue background from the user's reference picture
+        const highlightClass = isFirst ? 'bg-[#e8f0fe] border-[#c2e7ff]' : 'border-transparent hover:border-[#dadce0] hover:bg-[#f8fafd]';
+
+        return `
+          <div onclick="handleGoogleAccountClick('${acc.email}', '${acc.name}', ${acc.isOwner ? 'true' : 'false'})" class="group flex items-center justify-between p-2.5 sm:p-3 rounded-lg border ${highlightClass} cursor-pointer transition-colors relative">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-full overflow-hidden border border-[#dadce0] shrink-0">
+                ${avatarHtml}
+              </div>
+              <div class="truncate">
+                <div class="text-xs font-medium text-[#202124] group-hover:text-[#1a73e8] transition truncate">${acc.name || acc.email.split('@')[0]}</div>
+                <div class="text-[11px] text-[#5f6368] truncate">${acc.email}</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              ${isGoogleRemoveMode ? `
+                <button type="button" onclick="event.stopPropagation(); removeAccountFromDevice('${acc.email}')" class="text-[#d93025] hover:bg-red-50 p-1 rounded-full transition cursor-pointer" title="Remove this account">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              ` : `
+                <span class="text-[11px] text-[#5f6368]">${acc.status || 'Signed out'}</span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openGoogleChooser() {
+      isGoogleRemoveMode = false;
+      const removeLabel = document.getElementById('google-remove-toggle-label');
+      if (removeLabel) removeLabel.innerText = 'Remove an account';
+
+      showGoogleChooseView();
+      renderGoogleAccountsList();
+
+      document.getElementById('modal-google-chooser').classList.remove('hidden');
+    }
+
+    function closeGoogleChooser() {
+      document.getElementById('modal-google-chooser').classList.add('hidden');
+    }
+
+    function showGoogleChooseView() {
+      document.getElementById('google-view-choose').classList.remove('hidden');
+      document.getElementById('google-view-another').classList.add('hidden');
+      document.getElementById('google-view-owner-verify').classList.add('hidden');
+    }
+
+    function showGoogleAnotherAccountView() {
+      document.getElementById('google-view-choose').classList.add('hidden');
+      document.getElementById('google-view-another').classList.remove('hidden');
+      document.getElementById('google-view-owner-verify').classList.add('hidden');
+      const input = document.getElementById('google-another-email-input');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+      }
+      const err = document.getElementById('google-another-error-banner');
+      if (err) err.classList.add('hidden');
+    }
+
+    function showGoogleOwnerVerifyView(email) {
+      document.getElementById('google-view-choose').classList.add('hidden');
+      document.getElementById('google-view-another').classList.add('hidden');
+      document.getElementById('google-view-owner-verify').classList.remove('hidden');
+      const chip = document.getElementById('google-verify-email-chip');
+      if (chip) chip.innerText = email;
+      const input = document.getElementById('google-owner-pwd-input');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+      }
+      const err = document.getElementById('google-owner-error-banner');
+      if (err) err.classList.add('hidden');
+    }
+
+    function toggleGoogleRemoveMode() {
+      isGoogleRemoveMode = !isGoogleRemoveMode;
+      const removeLabel = document.getElementById('google-remove-toggle-label');
+      if (removeLabel) {
+        removeLabel.innerText = isGoogleRemoveMode ? 'Done removing' : 'Remove an account';
+      }
+      renderGoogleAccountsList();
+    }
+
+    function toggleGooglePwdVisibility(checkbox) {
+      const pwdInput = document.getElementById('google-owner-pwd-input');
+      if (pwdInput) {
+        pwdInput.type = checkbox.checked ? 'text' : 'password';
+      }
+    }
+
+    async function handleGoogleAccountClick(email, name, isOwner) {
+      if (isGoogleRemoveMode) return;
+
+      selectedGoogleAccount = { email, name, isOwner };
+
+      if (isOwner || isOwnerUser(email)) {
+        showGoogleOwnerVerifyView(email);
+      } else {
+        await authenticateWithGoogleAccount(email, '');
+      }
+    }
+
+    async function submitGoogleOwnerVerify() {
+      const pwdInput = document.getElementById('google-owner-pwd-input');
+      const password = pwdInput ? pwdInput.value : '';
+      const errBanner = document.getElementById('google-owner-error-banner');
+      const errText = document.getElementById('google-owner-error-text');
+
+      if (!password) {
+        errText.innerText = 'Enter your password.';
+        errBanner.classList.remove('hidden');
+        return;
+      }
+
+      await authenticateWithGoogleAccount('dakshbugalia1@gmail.com', password, errBanner, errText);
+    }
+
+    async function submitGoogleAnotherAccount() {
+      const input = document.getElementById('google-another-email-input');
+      const email = (input?.value || '').trim();
+      const errBanner = document.getElementById('google-another-error-banner');
+      const errText = document.getElementById('google-another-error-text');
+
+      if (!email || !email.includes('@')) {
+        errText.innerText = 'Enter a valid Google email address.';
+        errBanner.classList.remove('hidden');
+        return;
+      }
+
+      if (isOwnerUser(email)) {
+        showGoogleOwnerVerifyView(email);
+        return;
+      }
+
+      // Add to device list
+      addAccountToDevice({
+        name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
+        email: email,
+        avatar: '',
+        isOwner: false,
+        status: 'Signed out'
+      });
+
+      await authenticateWithGoogleAccount(email, '', errBanner, errText);
+    }
+
+    async function authenticateWithGoogleAccount(email, password = '', errBanner = null, errText = null) {
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            authProvider: 'google',
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || 'Authentication failed');
+        }
+
+        // Save active account to device list
+        addAccountToDevice({
+          name: data.user.name,
+          email: data.user.email,
+          avatar: data.user.isOwner ? '/logo.jpg' : '',
+          isOwner: data.user.isOwner,
+          status: 'Active'
+        });
+
+        closeGoogleChooser();
+        loginUser(data.user, true);
+      } catch (err) {
+        if (errBanner && errText) {
+          errText.innerText = err.message;
+          errBanner.classList.remove('hidden');
+        } else {
+          alert('Google Sign-In Error: ' + err.message);
+        }
+      }
+    }
+
+    // Guest Login
+    function handleGuestLogin() {
+      const guestUser = {
+        id: `guest-${Date.now()}`,
+        name: 'Guest Workstation',
+        email: 'guest@workstation.local',
+        role: 'Guest User',
+        isOwner: false,
+        isGuest: true,
+        authProvider: 'guest',
+      };
+      loginUser(guestUser, false);
+    }
+
+    // Password Sign In / Sign Up
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('input-auth-email').value.trim();
+      const password = document.getElementById('input-auth-password').value;
+      const remember = document.getElementById('remember-me-checkbox').checked;
+
+      if (!email || !email.includes('@')) {
+        showLoginError('Please enter a valid email address.');
+        return;
+      }
+      if (password.length < 4) {
+        showLoginError('Password must be at least 4 characters.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            authProvider: 'password',
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || 'Sign in failed');
+        }
+
+        loginUser(data.user, remember);
+      } catch (err) {
+        showLoginError(err.message);
+      }
+    }
+
+    function showLoginError(msg) {
+      const banner = document.getElementById('login-error-banner');
+      document.getElementById('login-error-text').innerText = msg;
+      banner.classList.remove('hidden');
+    }
+
+    // Login Routine
+    function loginUser(user, remember) {
+      currentUser = user;
+      localStorage.setItem('daksh_auth_session', JSON.stringify(user));
+
+      const vl = document.getElementById('view-login') || document.getElementById('loginScreen');
+      if (vl) vl.classList.add('hidden');
+      const aml = document.getElementById('app-main-layout');
+      if (aml) aml.classList.remove('hidden');
+
+      const initial = (user.name || user.email)[0].toUpperCase();
+      const displayName = user.name || user.email.split('@')[0];
+      const headAvatar = document.getElementById('header-avatar');
+      if (headAvatar) headAvatar.innerText = initial;
+      const headUser = document.getElementById('header-username');
+      if (headUser) headUser.innerText = displayName;
+
+      const sideAvatar = document.getElementById('sidebar-avatar');
+      if (sideAvatar) sideAvatar.innerText = initial;
+      const sideUser = document.getElementById('sidebar-username');
+      if (sideUser) sideUser.innerText = displayName;
+
+      const mobAvatar = document.getElementById('mobile-sidebar-avatar');
+      if (mobAvatar) mobAvatar.innerText = initial;
+      const mobUser = document.getElementById('mobile-sidebar-username');
+      if (mobUser) mobUser.innerText = displayName;
+
+      loadUserData(user.email, user.isGuest);
+      switchTab('chat');
+      updateAudioToggleIcon();
+      detectSystemTelemetry();
+      applySidebarState();
+      lucide.createIcons();
+    }
+
+    function loadUserData(email, isGuest) {
+      if (isGuest) {
+        appState.conversations = [{ id: 'guest-session-1', title: 'Workstation Session', messages: [] }];
+        appState.activeConversationId = 'guest-session-1';
+        appState.knowledgeDocs = [
+          { id: 'g-doc-1', title: 'PC Optimization Manual', source: 'manual', wordCount: 380, content: 'PC Performance Optimization Manual for guest testing.' }
+        ];
+      } else {
+        const safeEmailKey = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const savedConvs = localStorage.getItem(`daksh_convs_${safeEmailKey}`);
+        const savedKB = localStorage.getItem(`daksh_kb_${safeEmailKey}`);
+
+        if (savedConvs) {
+          appState.conversations = JSON.parse(savedConvs);
+        } else {
+          appState.conversations = [{ id: `session-${Date.now()}`, title: 'Workstation Session', messages: [] }];
+        }
+        appState.activeConversationId = appState.conversations[0]?.id || `session-${Date.now()}`;
+
+        if (savedKB) {
+          appState.knowledgeDocs = JSON.parse(savedKB);
+        } else {
+          appState.knowledgeDocs = [
+            { id: 'doc-1', title: 'PC Performance Optimization & Tuning Manual', source: 'manual', wordCount: 380, content: '# PC Performance Optimization Manual\n- Windows Standby RAM Purging\n- SSD TRIM Automation\n- Power Profile configuration' },
+            { id: 'doc-2', title: 'Daksh Intelligence Architecture Guide', source: 'manual', wordCount: 320, content: '# Daksh Intelligence Architecture\nCreated and owned by Daksh Bugalia.\nFeatures: Short-term memory, voice modes, knowledge base grounding.' },
+            { id: 'doc-3', title: 'DevOps & Git Terminal Playbook', source: 'manual', wordCount: 340, content: '# DevOps & Git Terminal Playbook\n- Port Diagnostics: Get-NetTCPConnection\n- Git Clean: git reset --soft HEAD~1\n- Docker hygiene' },
+          ];
+        }
+      }
+
+      renderConversationsList();
+      renderKnowledgeBase();
+      updateBadges();
+      renderMessages();
+    }
+
+    function saveUserData() {
+      if (!currentUser || currentUser.isGuest) return;
+      const safeEmailKey = currentUser.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      localStorage.setItem(`daksh_convs_${safeEmailKey}`, JSON.stringify(appState.conversations));
+      localStorage.setItem(`daksh_kb_${safeEmailKey}`, JSON.stringify(appState.knowledgeDocs));
+    }
+
+    function handleLogout() {
+      if (currentUser && currentUser.isGuest) {
+        appState.conversations = [];
+        appState.knowledgeDocs = [];
+      }
+      currentUser = null;
+      localStorage.removeItem('daksh_auth_session');
+      closeSettingsHub();
+      showLoginScreen();
+    }
+
+    // ================= SETTINGS & PROFILE HUB =================
+    function openSettingsHub(initialTab = 'settings') {
+      if (!currentUser) return;
+
+      const isOwner = isOwnerUser(currentUser.email);
+      document.getElementById('hub-username-label').innerText = currentUser.email;
+      const roleBadge = document.getElementById('hub-role-badge');
+      if (isOwner) {
+        roleBadge.innerText = '👑 Owner';
+        roleBadge.className = 'text-[9px] px-2 py-0.5 rounded-full font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold';
+      } else if (currentUser.isGuest) {
+        roleBadge.innerText = 'Guest';
+        roleBadge.className = 'text-[9px] px-2 py-0.5 rounded-full font-mono bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold';
+      } else {
+        roleBadge.innerText = 'Verified Member';
+        roleBadge.className = 'text-[9px] px-2 py-0.5 rounded-full font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold';
+      }
+
+      document.getElementById('hub-acc-name').innerText = currentUser.name || (isOwner ? 'Daksh Bugalia' : 'Member');
+      document.getElementById('hub-acc-email').innerText = currentUser.email;
+      document.getElementById('hub-acc-conv-count').innerText = appState.conversations.length;
+
+      document.getElementById('setting-auto-speak').checked = appState.autoSpeak;
+      document.getElementById('setting-voice-model').value = appState.voiceModel;
+      document.getElementById('setting-voice-rate').value = appState.voiceRate;
+      document.getElementById('voice-speed-val').innerText = appState.voiceRate + 'x';
+
+      document.getElementById('setting-ai-model').value = appState.aiModel;
+      document.getElementById('setting-persona').value = appState.persona;
+      document.getElementById('setting-temperature').value = appState.temperature;
+      document.getElementById('temp-val').innerText = appState.temperature;
+      document.getElementById('setting-api-key').value = appState.apiKey;
+
+      if (initialTab === 'profile') {
+        openHubSection('account');
+      } else {
+        showHubMainMenu();
+      }
+
+      document.getElementById('modal-settings-hub').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeSettingsHub() {
+      document.getElementById('modal-settings-hub').classList.add('hidden');
+    }
+
+    function showHubMainMenu() {
+      document.getElementById('hub-main-menu').classList.remove('hidden');
+      const sections = ['voice', 'model', 'notifications', 'language', 'privacy', 'devices', 'account'];
+      sections.forEach(s => {
+        const el = document.getElementById(`hub-section-${s}`);
+        if (el) el.classList.add('hidden');
+      });
+      lucide.createIcons();
+    }
+
+    function openHubSection(sectionName) {
+      document.getElementById('hub-main-menu').classList.add('hidden');
+      const sections = ['voice', 'model', 'notifications', 'language', 'privacy', 'devices', 'account'];
+      sections.forEach(s => {
+        const el = document.getElementById(`hub-section-${s}`);
+        if (el) el.classList.toggle('hidden', s !== sectionName);
+      });
+      lucide.createIcons();
+    }
+
+    function saveAllSettings() {
+      appState.autoSpeak = document.getElementById('setting-auto-speak').checked;
+      appState.voiceModel = document.getElementById('setting-voice-model').value;
+      appState.voiceRate = parseFloat(document.getElementById('setting-voice-rate').value);
+      appState.aiModel = document.getElementById('setting-ai-model').value;
+      appState.persona = document.getElementById('setting-persona').value;
+      appState.temperature = parseFloat(document.getElementById('setting-temperature').value);
+      appState.apiKey = document.getElementById('setting-api-key').value.trim();
+
+      localStorage.setItem('AUTO_SPEAK', appState.autoSpeak);
+      localStorage.setItem('VOICE_MODEL', appState.voiceModel);
+      localStorage.setItem('VOICE_RATE', appState.voiceRate);
+      localStorage.setItem('AI_MODEL', appState.aiModel);
+      localStorage.setItem('AI_PERSONA', appState.persona);
+      localStorage.setItem('AI_TEMP', appState.temperature);
+      localStorage.setItem('GEMINI_API_KEY', appState.apiKey);
+
+      updateAudioToggleIcon();
+      closeSettingsHub();
+      alert('Settings saved and applied successfully!');
+    }
+
+    // Telemetry & Hardware Detection
+    function detectSystemTelemetry() {
+      let os = 'Windows 11 Workstation';
+      const ua = navigator.userAgent;
+      if (ua.includes('Win')) os = 'Windows 11 / 10 PC';
+      else if (ua.includes('Mac')) os = 'macOS Workstation';
+      else if (ua.includes('Linux')) os = 'Linux Enterprise PC';
+      else if (ua.includes('Android')) os = 'Android Mobile';
+      else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS Device';
+
+      document.getElementById('telemetry-os-name').innerText = os;
+      document.getElementById('telemetry-host-name').innerText = window.location.host || 'localhost:3000';
+      document.getElementById('telemetry-screen-res').innerText = `Screen: ${window.screen.width}x${window.screen.height}`;
+      document.getElementById('telemetry-cores').innerText = `${navigator.hardwareConcurrency || 8} vCPUs`;
+    }
+
+    // Audio & Auto-Speech
+    function toggleAudioSpeech() {
+      appState.autoSpeak = !appState.autoSpeak;
+      localStorage.setItem('AUTO_SPEAK', appState.autoSpeak);
+      updateAudioToggleIcon();
+      if (appState.autoSpeak) {
+        speakText('Voice output enabled.');
+      } else {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    }
+
+    function updateAudioToggleIcon() {
+      const btn = document.getElementById('audio-toggle-btn');
+      if (appState.autoSpeak) {
+        btn.className = 'p-2 rounded-lg text-cyan-400 bg-cyan-950/60 border border-cyan-500/40 transition-colors shadow-sm shadow-cyan-500/20 cursor-pointer';
+        btn.title = 'Auto-Speech: ON';
+      } else {
+        btn.className = 'p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800 transition-colors cursor-pointer';
+        btn.title = 'Auto-Speech: OFF';
+      }
+    }
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const clean = text.replace(/[*#`_~\[\]]/g, '').trim();
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.rate = appState.voiceRate || 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Microphone Voice Dictation
+    function toggleMicrophone() {
+      const micBtn = document.getElementById('mic-btn');
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRec) {
+        alert('Voice dictation is not supported in this browser. Please use Google Chrome or Microsoft Edge.');
+        return;
+      }
+
+      if (isListening && speechRecognition) {
+        speechRecognition.stop();
+        isListening = false;
+        micBtn.className = 'p-2 text-slate-400 hover:text-cyan-300 rounded-lg transition-all cursor-pointer';
+        return;
+      }
+
+      speechRecognition = new SpeechRec();
+      speechRecognition.continuous = false;
+      speechRecognition.interimResults = true;
+      speechRecognition.lang = 'en-US';
+
+      const mobMicBtn = document.getElementById('mobile-mic-btn');
+
+      speechRecognition.onstart = function() {
+        isListening = true;
+        micBtn.className = 'p-2 text-rose-500 bg-rose-950/60 border border-rose-500/50 rounded-lg transition-all animate-pulse cursor-pointer';
+        if (mobMicBtn) mobMicBtn.className = 'p-2 text-rose-500 bg-rose-950/60 border border-rose-500/50 rounded-xl transition-all animate-pulse cursor-pointer';
+      };
+
+      speechRecognition.onresult = function(event) {
+        const transcript = Array.from(event.results).map(r => r[0].transcript).join('');
+        const pcInput = document.getElementById('chat-input');
+        const mobInput = document.getElementById('mobile-chat-input');
+        if (pcInput) pcInput.value = transcript;
+        if (mobInput) mobInput.value = transcript;
+      };
+
+      speechRecognition.onerror = function() {
+        isListening = false;
+        micBtn.className = 'p-2 text-slate-400 hover:text-cyan-300 rounded-lg transition-all cursor-pointer';
+        if (mobMicBtn) mobMicBtn.className = 'p-2 text-gray-400 hover:text-cyan-400 rounded-xl transition hover:bg-[#182033] cursor-pointer';
+      };
+
+      speechRecognition.onend = function() {
+        isListening = false;
+        micBtn.className = 'p-2 text-slate-400 hover:text-cyan-300 rounded-lg transition-all cursor-pointer';
+        if (mobMicBtn) mobMicBtn.className = 'p-2 text-gray-400 hover:text-cyan-400 rounded-xl transition hover:bg-[#182033] cursor-pointer';
+      };
+
+      speechRecognition.start();
+    }
+
+    // Tab Navigation: Only Chat and Knowledge Base
+    function switchTab(tabId) {
+      const tabs = ['chat', 'knowledge'];
+      tabs.forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (!view || !btn) return;
+        if (t === tabId) {
+          view.classList.remove('hidden');
+          btn.className = 'flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap bg-indigo-600/30 text-indigo-200 border border-indigo-500/40 shadow-sm cursor-pointer';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 cursor-pointer';
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function updateBadges() {
+      const count = appState.knowledgeDocs.length;
+      const kbBadge = document.getElementById('badge-knowledge-count');
+      if (kbBadge) kbBadge.innerText = count;
+      const mobBadge = document.getElementById('mobile-badge-knowledge-count');
+      if (mobBadge) mobBadge.innerText = count;
+    }
+
+    // Conversations
+    function renderConversationsList() {
+      const container = document.getElementById('conversation-list');
+      const mobileContainer = document.getElementById('mobile-conversations-list');
+      const countLabel = document.getElementById('conv-count-label');
+      const mobileCountLabel = document.getElementById('mobile-conv-count-label');
+      if (countLabel) countLabel.innerText = `Conversations (${appState.conversations.length})`;
+      if (mobileCountLabel) mobileCountLabel.innerText = `Conversations (${appState.conversations.length})`;
+
+      if (container) {
+        container.innerHTML = appState.conversations.map(c => {
+          const isActive = c.id === appState.activeConversationId;
+          return `
+            <div onclick="selectConversation('${c.id}')" class="group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs cursor-pointer transition-colors ${isActive ? 'bg-[#10192e] text-white font-medium border border-cyan-500/40 shadow-sm' : 'text-slate-400 hover:bg-[#0c1322] hover:text-slate-200'}">
+              <div class="flex items-center gap-2 truncate min-w-0">
+                <i data-lucide="message-square" class="w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : 'text-slate-500'} shrink-0"></i>
+                <span class="truncate">${c.title || 'Workstation Session'}</span>
+              </div>
+              <button onclick="deleteConversation(event, '${c.id}')" class="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 transition-opacity cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (mobileContainer) {
+        mobileContainer.innerHTML = appState.conversations.map(c => {
+          const isActive = c.id === appState.activeConversationId;
+          return `
+            <div onclick="selectConversation('${c.id}'); toggleSidebar(false);" class="w-full text-left px-3 py-2.5 rounded-xl border text-xs font-medium flex items-center justify-between transition cursor-pointer ${isActive ? 'bg-[#182033] border-blue-500/50 text-blue-300 shadow-md' : 'bg-[#111726] border-[#1b2438] text-gray-300 hover:border-blue-500/40'}">
+              <div class="flex items-center gap-2.5 overflow-hidden">
+                <i class="fa-regular fa-comment-dots ${isActive ? 'text-blue-400' : 'text-gray-400'}"></i>
+                <span class="truncate">${c.title || 'Workstation Session'}</span>
+              </div>
+              <button onclick="event.stopPropagation(); deleteConversation(event, '${c.id}')" class="text-gray-500 hover:text-rose-400 p-1 cursor-pointer">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    function selectConversation(id) {
+      appState.activeConversationId = id;
+      const conv = appState.conversations.find(c => c.id === id);
+      const titleEl = document.getElementById('active-chat-title');
+      if (conv && titleEl) {
+        titleEl.innerText = conv.title || 'Workstation Session';
+      }
+      renderConversationsList();
+      renderMessages();
+      if (window.innerWidth < 768) {
+        toggleSidebar(false);
+      }
+    }
+
+    function selectPrompt(title, fullPrompt) {
+      const inputEl = document.getElementById('chat-input');
+      const mobileInputEl = document.getElementById('mobile-chat-input');
+      if (inputEl) inputEl.value = fullPrompt;
+      if (mobileInputEl) mobileInputEl.value = fullPrompt;
+      sendMessage();
+    }
+
+    function sendQuickPrompt(prompt) {
+      selectPrompt('', prompt);
+    }
+
+    function handleMobileSubmit(event) {
+      event.preventDefault();
+      sendMessage();
+    }
+
+    function handleMobileInputKeydown(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function handleFileSelect(event) {
+      handleFileUpload(event);
+    }
+
+    function createNewConversation() {
+      const newId = `session-${Date.now()}`;
+      appState.conversations.unshift({ id: newId, title: 'Workstation Session', messages: [] });
+      appState.activeConversationId = newId;
+      saveUserData();
+      renderConversationsList();
+      selectConversation(newId);
+    }
+
+    function deleteConversation(e, id) {
+      e.stopPropagation();
+      appState.conversations = appState.conversations.filter(c => c.id !== id);
+      if (appState.conversations.length === 0) {
+        createNewConversation();
+      } else {
+        appState.activeConversationId = appState.conversations[0].id;
+        saveUserData();
+        renderConversationsList();
+        selectConversation(appState.activeConversationId);
+      }
+    }
+
+    function clearCurrentChat() {
+      const activeConv = appState.conversations.find(c => c.id === appState.activeConversationId);
+      if (activeConv) {
+        activeConv.messages = [];
+        saveUserData();
+        renderMessages();
+      }
+    }
+
+    function clearAllConversations() {
+      if (confirm('Clear all conversation history?')) {
+        appState.conversations = [];
+        createNewConversation();
+      }
+    }
+
+    // Chat Execution
+    function handleInputKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function sendQuickPrompt(prompt) {
+      document.getElementById('chat-input').value = prompt;
+      sendMessage();
+    }
+
+    function stopGeneration() {
+      if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+      }
+      appState.isGenerating = false;
+      document.getElementById('stop-gen-btn').classList.add('hidden');
+      document.getElementById('send-btn').classList.remove('hidden');
+      const mobSend = document.getElementById('mobile-send-btn');
+      if (mobSend) mobSend.classList.remove('opacity-50', 'pointer-events-none');
+    }
+
+    async function sendMessage() {
+      const inputEl = document.getElementById('chat-input');
+      const mobileInputEl = document.getElementById('mobile-chat-input');
+      const text = (mobileInputEl?.value || inputEl?.value || '').trim();
+      if (!text && !appState.currentAttachment) return;
+      if (appState.isGenerating) return;
+
+      const activeConv = appState.conversations.find(c => c.id === appState.activeConversationId);
+      if (!activeConv) return;
+
+      if (activeConv.messages.length === 0) {
+        activeConv.title = text.slice(0, 32) + (text.length > 32 ? '...' : '');
+        renderConversationsList();
+      }
+
+      const userMsg = {
+        role: 'user',
+        content: text,
+        attachment: appState.currentAttachment,
+        timestamp: Date.now()
+      };
+      activeConv.messages.push(userMsg);
+      if (inputEl) inputEl.value = '';
+      if (mobileInputEl) mobileInputEl.value = '';
+      removeAttachment();
+
+      document.getElementById('chat-empty-hero').classList.add('hidden');
+      document.getElementById('messages-list').classList.remove('hidden');
+      renderMessages();
+
+      const assistantMsg = { role: 'assistant', content: '', timestamp: Date.now() };
+      activeConv.messages.push(assistantMsg);
+      appState.isGenerating = true;
+
+      document.getElementById('send-btn').classList.add('hidden');
+      const mobileSend = document.getElementById('mobile-send-btn');
+      if (mobileSend) mobileSend.classList.add('opacity-50', 'pointer-events-none');
+      document.getElementById('stop-gen-btn').classList.remove('hidden');
+
+      const knowledgeContext = appState.knowledgeDocs.map(d => `--- Document: ${d.title} ---\n${d.content}`).join('\n\n');
+
+      currentAbortController = new AbortController();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: currentAbortController.signal,
+          body: JSON.stringify({
+            messages: activeConv.messages.slice(0, -1),
+            temperature: appState.temperature,
+            fileAttachment: userMsg.attachment,
+            knowledgeContext: knowledgeContext
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.detail || errData.error || `HTTP ${response.status}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            const dataStr = trimmed.slice(6).trim();
+            if (dataStr === '[DONE]') break;
+
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.text) {
+                assistantMsg.content += parsed.text;
+                updateLastAssistantMessage(assistantMsg.content);
+              }
+            } catch (e) {
+              if (dataStr) {
+                assistantMsg.content += dataStr;
+                updateLastAssistantMessage(assistantMsg.content);
+              }
+            }
+          }
+        }
+
+        if (appState.autoSpeak && assistantMsg.content) {
+          speakText(assistantMsg.content);
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          assistantMsg.content += '\n\n*(Generation stopped by user)*';
+        } else {
+          assistantMsg.content = `⚠️ **Error communicating with Gemini:** ${err.message}`;
+        }
+        updateLastAssistantMessage(assistantMsg.content);
+      } finally {
+        appState.isGenerating = false;
+        currentAbortController = null;
+        document.getElementById('stop-gen-btn').classList.add('hidden');
+        document.getElementById('send-btn').classList.remove('hidden');
+        const mobSend = document.getElementById('mobile-send-btn');
+        if (mobSend) mobSend.classList.remove('opacity-50', 'pointer-events-none');
+        saveUserData();
+        renderMessages();
+      }
+    }
+
+    function renderMessages() {
+      const activeConv = appState.conversations.find(c => c.id === appState.activeConversationId);
+      const listEl = document.getElementById('messages-list');
+      if (!activeConv || activeConv.messages.length === 0) {
+        document.getElementById('chat-empty-hero').classList.remove('hidden');
+        listEl.classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('chat-empty-hero').classList.add('hidden');
+      listEl.classList.remove('hidden');
+
+      listEl.innerHTML = activeConv.messages.map((m, idx) => {
+        const isUser = m.role === 'user';
+        let attHtml = '';
+        if (m.attachment) {
+          if (m.attachment.data) {
+            attHtml = `<img src="data:${m.attachment.mimeType};base64,${m.attachment.data}" class="max-w-xs rounded-xl mt-2 border border-blue-500/40">`;
+          } else if (m.attachment.text) {
+            attHtml = `<div class="mt-2 p-2 bg-[#0e131f] border border-blue-500/40 rounded-xl text-xs font-mono text-cyan-300">📄 ${m.attachment.name}</div>`;
+          }
+        }
+
+        const formattedBody = isUser ? escapeHtml(m.content) : marked.parse(m.content || '');
+
+        if (isUser) {
+          return `
+            <div class="flex justify-end gap-2.5 mb-3 group">
+              <div class="max-w-[88%] sm:max-w-[75%] bg-blue-600 md:bg-gradient-to-r md:from-indigo-600 md:to-indigo-700 text-white p-3 sm:px-4 sm:py-3 rounded-2xl rounded-tr-xs text-xs leading-relaxed shadow-md">
+                ${attHtml}
+                <div class="whitespace-pre-wrap">${formattedBody}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="flex items-start gap-2.5 mb-4 group">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#090d16] border border-cyan-500/40 flex items-center justify-center shrink-0 mt-0.5 shadow-sm shadow-cyan-500/20 overflow-hidden">
+                <span class="text-[9px] font-black text-cyan-400 block md:hidden">DA</span>
+                <img src="assets/daksh-logo.png" class="w-full h-full object-cover hidden md:block">
+              </div>
+
+              <div class="max-w-[90%] sm:max-w-[80%] bg-[#0e131f] md:bg-[#0b1322] border border-[#1b2438] md:border-cyan-950/60 p-3.5 sm:px-4 sm:py-3 rounded-2xl rounded-tl-xs text-xs text-gray-200 shadow-lg space-y-2">
+                <div class="flex items-center justify-between border-b border-[#1b2438] pb-1.5 text-[10px] text-gray-400">
+                  <span class="font-bold text-cyan-400 flex items-center gap-1">
+                    <i class="fa-solid fa-robot text-xs"></i>
+                    <span>Daksh Intelligence</span>
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <button onclick="speakText('${escapeQuotes(m.content || '')}')" class="hover:text-cyan-300 transition-colors cursor-pointer" title="Speak">
+                      <i class="fa-solid fa-volume-high text-[11px]"></i>
+                    </button>
+                    <button onclick="navigator.clipboard.writeText('${escapeQuotes(m.content || '')}');" class="hover:text-cyan-300 transition-colors cursor-pointer" title="Copy text">
+                      <i class="fa-regular fa-copy text-[11px]"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="prose prose-invert prose-xs sm:prose-sm max-w-none text-slate-200 leading-relaxed overflow-x-auto">${formattedBody}</div>
+                ${attHtml}
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+
+      document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+      lucide.createIcons();
+      scrollChatToBottom();
+    }
+
+    function updateLastAssistantMessage(content) {
+      const listEl = document.getElementById('messages-list');
+      const lastBubble = listEl.lastElementChild?.querySelector('.prose');
+      if (lastBubble) {
+        lastBubble.innerHTML = marked.parse(content);
+        lastBubble.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+      }
+      scrollChatToBottom();
+    }
+
+    function scrollChatToBottom() {
+      const container = document.getElementById('chat-messages-container');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    }
+
+    function escapeQuotes(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+    }
+
+    // Attachments
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      if (file.type.startsWith('image/')) {
+        reader.onload = function(evt) {
+          appState.currentAttachment = {
+            name: file.name,
+            mimeType: file.type,
+            data: evt.target.result.split(',')[1],
+          };
+          document.getElementById('attachment-preview').classList.remove('hidden');
+          document.getElementById('attachment-name').innerText = `📎 ${file.name}`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        reader.onload = function(evt) {
+          appState.currentAttachment = {
+            name: file.name,
+            mimeType: file.type || 'text/plain',
+            text: evt.target.result,
+          };
+          document.getElementById('attachment-preview').classList.remove('hidden');
+          document.getElementById('attachment-name').innerText = `📄 ${file.name}`;
+        };
+        reader.readAsText(file);
+      }
+    }
+
+    function removeAttachment() {
+      appState.currentAttachment = null;
+      const prev = document.getElementById('attachment-preview');
+      if (prev) prev.classList.add('hidden');
+      const fi = document.getElementById('file-upload-input');
+      if (fi) fi.value = '';
+      const mfi = document.getElementById('mobile-chat-file-input');
+      if (mfi) mfi.value = '';
+    }
+
+    // Knowledge Base
+    async function ingestUrl() {
+      const urlInput = document.getElementById('url-ingest-input');
+      const url = urlInput.value.trim();
+      if (!url) return alert('Please enter a valid URL.');
+
+      const btn = document.getElementById('btn-ingest-url');
+      btn.innerText = 'Ingesting...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/knowledge/fetch-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'URL Fetch Failed');
+
+        appState.knowledgeDocs.unshift({
+          id: `doc-${Date.now()}`,
+          title: data.title || url,
+          source: url,
+          wordCount: data.wordCount || 0,
+          content: data.content
+        });
+        saveUserData();
+        renderKnowledgeBase();
+        updateBadges();
+        urlInput.value = '';
+        alert('URL successfully ingested into Knowledge Base!');
+      } catch (e) {
+        alert('Failed to ingest URL: ' + e.message);
+      } finally {
+        btn.innerText = 'Ingest';
+        btn.disabled = false;
+      }
+    }
+
+    function addManualDoc() {
+      const title = document.getElementById('doc-title-input').value.trim();
+      const content = document.getElementById('doc-content-input').value.trim();
+      if (!title || !content) return alert('Title and content are required');
+
+      appState.knowledgeDocs.unshift({
+        id: `manual-${Date.now()}`,
+        title: title,
+        source: 'manual',
+        wordCount: content.split(/\s+/).length,
+        content: content
+      });
+      saveUserData();
+      renderKnowledgeBase();
+      updateBadges();
+      document.getElementById('doc-title-input').value = '';
+      document.getElementById('doc-content-input').value = '';
+      alert('Document added to Knowledge Base!');
+    }
+
+    function deleteDoc(id) {
+      appState.knowledgeDocs = appState.knowledgeDocs.filter(d => d.id !== id);
+      saveUserData();
+      renderKnowledgeBase();
+      updateBadges();
+    }
+
+    function renderKnowledgeBase() {
+      const listEl = document.getElementById('kb-documents-list');
+      listEl.innerHTML = appState.knowledgeDocs.map(d => `
+        <div class="cyber-panel rounded-2xl p-4 flex items-center justify-between">
+          <div class="min-w-0 pr-4">
+            <h4 class="font-bold text-xs text-white truncate">${d.title}</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5 truncate">${d.source} · ${d.wordCount} words</p>
+          </div>
+          <button onclick="deleteDoc('${d.id}')" class="p-2 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-900 transition-colors cursor-pointer">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // Command Palette (Ctrl+K)
+    function openQuickActionsModal() {
+      renderQuickActionsList(QUICK_ACTIONS_DATA);
+      document.getElementById('cmd-palette-input').value = '';
+      document.getElementById('modal-quick-actions').classList.remove('hidden');
+      document.getElementById('cmd-palette-input').focus();
+      lucide.createIcons();
+    }
+
+    function closeQuickActionsModal() {
+      document.getElementById('modal-quick-actions').classList.add('hidden');
+    }
+
+    function filterQuickActions() {
+      const q = document.getElementById('cmd-palette-input').value.toLowerCase().trim();
+      const filtered = QUICK_ACTIONS_DATA.filter(a => a.title.toLowerCase().includes(q) || a.prompt.toLowerCase().includes(q));
+      renderQuickActionsList(filtered);
+    }
+
+    function renderQuickActionsList(list) {
+      const container = document.getElementById('cmd-palette-list');
+      if (list.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-slate-500">No matching PC actions found.</div>`;
+        return;
+      }
+      container.innerHTML = list.map(a => `
+        <div onclick="executeCommandPaletteAction('${a.id}')" class="p-2.5 hover:bg-slate-800 rounded-xl cursor-pointer flex items-center justify-between transition-colors group">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i>
+            <div>
+              <div class="font-semibold text-slate-200 group-hover:text-cyan-300">${a.title}</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">${a.prompt}</div>
+            </div>
+          </div>
+          <span class="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">${a.cat}</span>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function executeCommandPaletteAction(id) {
+      const action = QUICK_ACTIONS_DATA.find(a => a.id === id);
+      if (action) {
+        closeQuickActionsModal();
+        switchTab('chat');
+        sendQuickPrompt(action.prompt);
+      }
+    }
+
+    // Export Data
+    function exportConversationsJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState.conversations, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `daksh_conversations_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function exportConversationsMarkdown() {
+      let md = `# Daksh Intelligence - Conversation History\nOwner: Daksh Bugalia\nExport Date: ${new Date().toISOString()}\n\n`;
+      appState.conversations.forEach(c => {
+        md += `## ${c.title || 'Workstation Session'}\n\n`;
+        (c.messages || []).forEach(m => {
+          md += `### ${m.role === 'user' ? 'User' : 'Daksh Intelligence'}:\n${m.content}\n\n`;
+        });
+        md += `---\n\n`;
+      });
+      const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(md);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `daksh_conversations_${Date.now()}.md`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openQuickActionsModal();
+      }
+      if (e.key === 'Escape') {
+        closeQuickActionsModal();
+        closeSettingsHub();
+        closeGoogleChooser();
+      }
+    });
+  </script>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
