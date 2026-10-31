@@ -426,6 +426,9 @@ function openAIChatApp() {
   if (window.renderMessages) {
     window.renderMessages();
   }
+  if (window.updateApiKeyStatusBadge) {
+    window.updateApiKeyStatusBadge();
+  }
   if (window.applySidebarState) {
     window.applySidebarState();
   }
