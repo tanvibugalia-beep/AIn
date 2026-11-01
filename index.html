@@ -338,11 +338,6 @@
           <kbd class="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded text-[10px] text-slate-400 font-mono">Ctrl+K</kbd>
         </button>
 
-        <button onclick="openSettingsHub('privacy')" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#0b1222] hover:bg-[#101b30] border border-cyan-800/60 rounded-lg text-xs transition-colors cursor-pointer" title="Configure Gemini API Key & Model">
-          <span id="api-key-indicator" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="api-key-label" class="text-[11px] font-medium text-amber-300">API Key</span>
-        </button>
-
         <button onclick="toggleAudioSpeech()" id="audio-toggle-btn" class="p-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900 border border-slate-800 transition-colors cursor-pointer" title="Toggle Auto-Speech">
           <i data-lucide="volume-2" class="w-4 h-4"></i>
         </button>
@@ -1035,9 +1030,9 @@
           <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
             <label class="block text-slate-200 font-medium">AI Model Engine</label>
             <select id="setting-ai-model" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white focus:outline-none">
-              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Default · Ultra-Fast & Stable)</option>
-              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen High Speed)</option>
-              <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning & Complex Code)</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default · Ultra-Fast)</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Stable Workhorse)</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Experimental Preview)</option>
             </select>
           </div>
 
@@ -1120,9 +1115,9 @@
 
         <div class="space-y-3">
           <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-2">
-            <label class="block text-slate-200 font-medium">Google Gemini API Key</label>
-            <input type="password" id="setting-api-key" placeholder="AQ.Ab8RN6I... (Permanent Cloud Key Connected)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
-            <p class="text-[10px] text-slate-400">Required for AI Chat. Get a 100% Free Gemini API key in 30 seconds from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-cyan-400 underline hover:text-cyan-300">Google AI Studio</a>. Saved securely on your device.</p>
+            <label class="block text-slate-200 font-medium">Gemini API Key (Optional Override)</label>
+            <input type="password" id="setting-api-key" placeholder="AIzaSy... (Leave empty to use server cloud key)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+            <p class="text-[10px] text-slate-400">Your key is kept safe and never shared with other users.</p>
           </div>
 
           <div class="p-3 bg-[#050914] border border-slate-800 rounded-xl space-y-1">
@@ -1398,7 +1393,6 @@
   
   <!-- ================= 4. AI CHAT ENGINE SCRIPTS ================= -->
   <script>
-    const DEFAULT_PERMANENT_KEY = window.DEFAULT_PERMANENT_KEY = 'AQ.Ab8RN6IiMRpqrAQY3ac-dqS1RTPg06OLG5DfFzZWnWhCbEaXEw';
     const OWNER_EMAILS = ['dakshbugalia1@gmail.com', 'dakshbugalia1@gamil.com'];
 
     // ================= SIDEBAR OPEN / CLOSE ROUTINE (PC & MOBILE) =================
@@ -1548,8 +1542,8 @@
     let isListening = false;
 
     let appState = {
-      apiKey: localStorage.getItem('GEMINI_API_KEY') || DEFAULT_PERMANENT_KEY,
-      aiModel: (localStorage.getItem('AI_MODEL') === 'gemini-2.5-flash' ? 'gemini-1.5-flash' : localStorage.getItem('AI_MODEL')) || 'gemini-1.5-flash',
+      apiKey: localStorage.getItem('GEMINI_API_KEY') || '',
+      aiModel: localStorage.getItem('AI_MODEL') || 'gemini-2.5-flash',
       persona: localStorage.getItem('AI_PERSONA') || 'daksh-core',
       temperature: parseFloat(localStorage.getItem('AI_TEMP') || '0.7'),
       autoSpeak: localStorage.getItem('AUTO_SPEAK') === 'true',
@@ -1561,36 +1555,6 @@
       currentAttachment: null,
       isGenerating: false,
     };
-
-    const PERSONA_SYSTEM_INSTRUCTIONS = {
-      'daksh-core': `You are Daksh Intelligence, a state-of-the-art PC Desktop AI Assistant and Workstation Copilot, engineered and owned by Daksh Bugalia.
-You specialize in helping users on their personal computers with:
-1. Answering questions using your built-in knowledge base, citing ingested source documents and URLs accurately.
-2. Short-term conversational memory: recall earlier user statements, questions, code, and preferences within this session.
-3. Managing user tasks, deadlines, and reminders.
-4. Programming, script automation (PowerShell, Bash, Python, JS, C++, Rust, etc.), debugging, and software architecture.
-5. System workflows, shortcuts, file organization, terminal commands, and productivity.
-When asked who built or owns you, proudly state that you are Daksh Intelligence, personal PC copilot created and owned by Daksh Bugalia. Maintain a polite, razor-sharp, and resourceful PC assistant demeanor.`,
-
-      'code-architect': `You are Nexus, a principal software architect and debugging specialist on the user's PC.
-When reviewing or writing code:
-1. Deliver production-quality, type-safe, and idiomatic code.
-2. Explain the root cause of errors directly before showing the fix.
-3. Optimize for readability, edge cases, and performance.
-4. Format code snippets cleanly with language identifiers.
-When asked who built or owns you, state that you are the Nexus Architect module of Daksh Intelligence, created by Daksh Bugalia.`,
-
-      'terminal-guru': `You are Terminal Guru, an expert in OS administration, command-line interfaces, and shell scripting (Windows PowerShell, Command Prompt, macOS/Linux Bash and Zsh).
-Provide safe, efficient, and well-explained commands.
-Always warn the user about destructive operations (like rm -rf or Remove-Item -Recurse) and suggest safer non-destructive alternatives.
-Created and owned by Daksh Bugalia as part of Daksh Intelligence.`,
-
-      'executive-planner': `You are Echo, a high-efficiency executive assistant within Daksh Intelligence.
-You turn raw brain dumps, meeting transcripts, and rough notes into crisp, prioritized, action-oriented documents.
-Format with clear headers, bullet points, and highlight next steps with assignees or deadlines when applicable.
-Engineered by Daksh Bugalia.`
-    };
-
 
     const QUICK_ACTIONS_DATA = [
       { id: 'ps-temp', title: 'Clean Windows Temp Files', cat: 'system', prompt: 'Write a safe PowerShell script to calculate and clean up %TEMP% and Windows temp files with administrator elevation check.' },
@@ -2118,7 +2082,7 @@ Engineered by Daksh Bugalia.`
       document.getElementById('setting-persona').value = appState.persona;
       document.getElementById('setting-temperature').value = appState.temperature;
       document.getElementById('temp-val').innerText = appState.temperature;
-      document.getElementById('setting-api-key').value = appState.apiKey || DEFAULT_PERMANENT_KEY;
+      document.getElementById('setting-api-key').value = appState.apiKey;
 
       if (initialTab === 'profile') {
         openHubSection('account');
@@ -2454,50 +2418,132 @@ Engineered by Daksh Bugalia.`
       if (mobSend) mobSend.classList.remove('opacity-50', 'pointer-events-none');
     }
 
-    function saveInlineApiKey() {
-      const input = document.getElementById('inline-key-input');
-      if (!input || !input.value.trim()) {
-        alert('Please enter a valid Gemini API key (starting with AIzaSy...).');
-        return;
-      }
-      const key = input.value.trim();
-      appState.apiKey = key;
-      localStorage.setItem('GEMINI_API_KEY', key);
-      const settingInput = document.getElementById('setting-api-key');
-      if (settingInput) settingInput.value = key;
-      updateApiKeyStatusBadge();
+    // ================= DAKSH INTELLIGENCE IMAGE GENERATOR & MULTI-TIER ENGINE =================
+    const PERSONA_SYSTEM_INSTRUCTIONS = {
+      'daksh-core': "You are Daksh Intelligence, an advanced AI Assistant and Workstation Copilot, engineered and owned by Daksh Bugalia. You specialize in answering questions, coding, research, writing, productivity, and personal computer automation. When asked who built or owns you, proudly state that you are Daksh Intelligence, created and owned by Daksh Bugalia. Maintain a polite, intelligent, and resourceful assistant demeanor.",
+      'code-architect': "You are Daksh Intelligence in Code Architect mode, created by Daksh Bugalia. You specialize in software engineering, architecture, code debugging, and performance optimization across all programming languages.",
+      'terminal-guru': "You are Daksh Intelligence in Terminal Guru mode, created by Daksh Bugalia. You provide accurate PowerShell, Bash, and terminal commands and scripts with clear explanations.",
+      'executive-writer': "You are Daksh Intelligence in Executive Writer mode, created by Daksh Bugalia. You write eloquent, concise, and structured professional documents, emails, and reports."
+    };
 
-      const activeConv = appState.conversations.find(c => c.id === appState.activeConversationId);
-      if (activeConv) {
-        const lastUserMsg = [...activeConv.messages].reverse().find(m => m.role === 'user');
-        if (lastUserMsg) {
-          activeConv.messages = activeConv.messages.filter(m => !m.isKeyPrompt);
-          renderMessages();
-          triggerAIResponse(lastUserMsg);
-          return;
+    function isImageGenerationRequest(text, hasAttachment) {
+      if (!text) return { isImage: false, action: null };
+      const t = text.toLowerCase().trim();
+
+      const imgTriggers = [
+        /\bgenerate\s+(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|portrait|graphic)\b/i,
+        /\bcreate\s+(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|portrait|graphic)\b/i,
+        /\bmake\s+(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|portrait|graphic)\b/i,
+        /\bdraw\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|something|a\s+|an\s+)?/i,
+        /\bpaint\s+(?:me\s+)?(?:an?\s+)?/i,
+        /\bphoto\s+of\b/i,
+        /\bpicture\s+of\b/i,
+        /\bimage\s+of\b/i,
+        /\bwallpaper\s+of\b/i,
+        /चित्र/i,
+        /फोटो/i,
+        /तस्वीर/i,
+        /इमेज/i,
+        /ड्राइंग/i
+      ];
+
+      for (const re of imgTriggers) {
+        if (re.test(t)) return { isImage: true, action: 'generate' };
+      }
+
+      if (hasAttachment) {
+        const editTriggers = [
+          /\bedit\b/i, /\bchange\b/i, /\bmodify\b/i, /\btransform\b/i,
+          /\banime\b/i, /\bcartoon\b/i, /\bcyberpunk\b/i, /\bfilter\b/i,
+          /\bvariation\b/i, /\bredraw\b/i, /\bstyle\b/i, /बदलो/i, /एडिट/i
+        ];
+        for (const re of editTriggers) {
+          if (re.test(t)) return { isImage: true, action: 'edit' };
         }
       }
-      alert('Gemini API Key saved successfully! AI Chat is now active.');
-    }
-    window.saveInlineApiKey = saveInlineApiKey;
 
-    function updateApiKeyStatusBadge() {
-      const badge = document.getElementById('api-key-indicator');
-      const label = document.getElementById('api-key-label');
-      const activeKey = appState.apiKey || DEFAULT_PERMANENT_KEY;
-      if (badge && label) {
-        if (activeKey) {
-          badge.className = 'w-2 h-2 rounded-full bg-emerald-400';
-          label.textContent = 'Gemini Active';
-          label.className = 'text-[11px] font-medium text-emerald-300';
-        } else {
-          badge.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-          label.textContent = 'API Key Needed';
-          label.className = 'text-[11px] font-medium text-amber-300';
-        }
+      return { isImage: false, action: null };
+    }
+
+    function extractCleanImagePrompt(text) {
+      let p = text.trim();
+      p = p.replace(/^(?:please\s+)?(?:can\s+you\s+)?(?:generate|create|make|draw|paint|render)\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|graphic)?(?:\s+of)?\s*/i, '');
+      p = p.replace(/^(?:फोटो|चित्र|तस्वीर|इमेज)\s+(?:बनाओ|दिखाओ)\s*/i, '');
+      return p.trim() || text.trim();
+    }
+
+    async function downloadGeneratedImage(url, filename) {
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename || `daksh_ai_image_${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+      } catch (e) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.download = filename || `daksh_ai_image_${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
       }
     }
-    window.updateApiKeyStatusBadge = updateApiKeyStatusBadge;
+    window.downloadGeneratedImage = downloadGeneratedImage;
+
+    async function handleImageGeneration(activeConv, userMsg, promptText, isEdit) {
+      const assistantMsg = { role: 'assistant', content: '', timestamp: Date.now() };
+      activeConv.messages.push(assistantMsg);
+      appState.isGenerating = true;
+
+      document.getElementById('send-btn')?.classList.add('hidden');
+      document.getElementById('mobile-send-btn')?.classList.add('opacity-50', 'pointer-events-none');
+      document.getElementById('stop-gen-btn')?.classList.remove('hidden');
+
+      const rawPrompt = extractCleanImagePrompt(promptText);
+      const enhancedPrompt = isEdit 
+        ? `${rawPrompt}, highly detailed artistic transformation, vibrant colors, 8k resolution, masterpiece, professional aesthetic`
+        : `${rawPrompt}, cinematic lighting, photorealistic, 8k resolution, ultra detailed, masterpiece`;
+
+      const seed = Math.floor(Math.random() * 9999999);
+      const encodedPrompt = encodeURIComponent(enhancedPrompt);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+
+      const cardHtml = `
+<div class="my-2 space-y-2.5 max-w-lg">
+  <p class="text-xs text-slate-200">✨ ${isEdit ? 'Here is the edited variation of your image:' : 'Here is your generated image:'} <strong>"${escapeHtml(rawPrompt)}"</strong></p>
+  <div class="relative group rounded-2xl overflow-hidden border border-cyan-500/40 bg-[#060a14] shadow-2xl shadow-cyan-950/40">
+    <img src="${imageUrl}" alt="${escapeHtml(rawPrompt)}" class="w-full h-auto object-cover rounded-2xl transition duration-300 group-hover:scale-[1.01]" loading="lazy" />
+  </div>
+  <div class="flex items-center gap-2 pt-1">
+    <button onclick="downloadGeneratedImage('${imageUrl}', 'daksh_image_${seed}.png')" class="flex-1 py-2 px-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md shadow-cyan-500/20 active:scale-95">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      <span>Download Image (PNG)</span>
+    </button>
+    <a href="${imageUrl}" target="_blank" rel="noopener noreferrer" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs rounded-xl font-medium flex items-center justify-center gap-1 transition shrink-0" title="Open full resolution in new tab">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+      <span>Full View</span>
+    </a>
+  </div>
+</div>
+      `;
+
+      assistantMsg.content = cardHtml;
+      updateLastAssistantMessage(assistantMsg.content);
+
+      appState.isGenerating = false;
+      document.getElementById('stop-gen-btn')?.classList.add('hidden');
+      document.getElementById('send-btn')?.classList.remove('hidden');
+      const mobSend = document.getElementById('mobile-send-btn');
+      if (mobSend) mobSend.classList.remove('opacity-50', 'pointer-events-none');
+      saveUserData();
+      renderMessages();
+    }
 
     async function sendMessage() {
       const inputEl = document.getElementById('chat-input');
@@ -2529,236 +2575,150 @@ Engineered by Daksh Bugalia.`
       document.getElementById('messages-list').classList.remove('hidden');
       renderMessages();
 
-      await triggerAIResponse(userMsg);
-    }
-
-    async function triggerAIResponse(userMsg) {
-      const activeConv = appState.conversations.find(c => c.id === appState.activeConversationId);
-      if (!activeConv) return;
-
-      if (!appState.apiKey) {
-        const promptKeyMsg = {
-          role: 'assistant',
-          isKeyPrompt: true,
-          content: `🔑 **Google Gemini API Key Required**\n\nDaksh Intelligence AI Chat connects directly to Google Gemini. Please enter your Gemini API key below to activate AI responses:\n\n<div class="my-3 p-3.5 bg-[#0e1628] border border-cyan-500/50 rounded-2xl space-y-3 shadow-lg shadow-cyan-950/40 not-prose">\n  <div class="text-xs text-cyan-300 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-key text-cyan-400"></i> Connect Google Gemini API Key:</div>\n  <div class="flex flex-col sm:flex-row gap-2">\n    <input type="password" id="inline-key-input" placeholder="Paste AIzaSy... here" class="flex-1 bg-[#050914] border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" />\n    <button onclick="saveInlineApiKey()" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer shadow-md shrink-0">Save & Connect</button>\n  </div>\n  <div class="text-[11px] text-slate-400 flex flex-wrap items-center gap-1">\n    <span>Don't have a key?</span>\n    <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-medium underline hover:text-cyan-300">Get a 100% Free Gemini Key from Google AI Studio ↗</a>\n    <span class="text-slate-500">(Instant, free tier, no credit card required)</span>\n  </div>\n</div>`,
-          timestamp: Date.now()
-        };
-        activeConv.messages.push(promptKeyMsg);
-        renderMessages();
-        saveUserData();
+      // 1. Detect if this is an image generation or image edit request
+      const hasAttachment = !!(userMsg.attachment && userMsg.attachment.mimeType && userMsg.attachment.mimeType.startsWith('image/'));
+      const imgCheck = isImageGenerationRequest(text, hasAttachment);
+      if (imgCheck.isImage) {
+        await handleImageGeneration(activeConv, userMsg, text, imgCheck.action === 'edit');
         return;
       }
 
+      // 2. Standard Text AI Conversation
       const assistantMsg = { role: 'assistant', content: '', timestamp: Date.now() };
       activeConv.messages.push(assistantMsg);
       appState.isGenerating = true;
 
-      document.getElementById('send-btn').classList.add('hidden');
+      document.getElementById('send-btn')?.classList.add('hidden');
       const mobileSend = document.getElementById('mobile-send-btn');
       if (mobileSend) mobileSend.classList.add('opacity-50', 'pointer-events-none');
-      document.getElementById('stop-gen-btn').classList.remove('hidden');
+      document.getElementById('stop-gen-btn')?.classList.remove('hidden');
 
       const knowledgeContext = appState.knowledgeDocs.map(d => `--- Document: ${d.title} ---\n${d.content}`).join('\n\n');
-
-      const candidateModels = [
-        appState.aiModel,
-        'gemini-3.8-flash',
-        'gemini-flash-latest',
-        'gemini-3.1-flash-lite',
-        'gemini-1.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-pro'
-      ].filter((v, i, a) => v && a.indexOf(v) === i && v !== 'gemini-2.5-flash');
-
-      const memoryMessages = activeConv.messages.slice(0, -1).filter(m => !m.isKeyPrompt);
-      const last12 = memoryMessages.slice(-12);
-      const geminiContents = [];
-
-      for (let i = 0; i < last12.length; i++) {
-        const msg = last12[i];
-        const role = (msg.role === 'assistant' || msg.role === 'model') ? 'model' : 'user';
-        const parts = [];
-
-        if (i === last12.length - 1 && userMsg.attachment) {
-          const att = userMsg.attachment;
-          if (att.mimeType && att.mimeType.startsWith('image/') && att.data) {
-            parts.push({
-              inlineData: {
-                mimeType: att.mimeType,
-                data: att.data
-              }
-            });
-          } else if (att.text) {
-            parts.push({
-              text: `[Attached Document: ${att.name || 'file'}]\n\`\`\`\n${att.text}\n\`\`\`\n\n`
-            });
-          }
-        }
-
-        if (msg.content) {
-          parts.push({ text: msg.content });
-        }
-
-        if (parts.length > 0) {
-          geminiContents.push({ role, parts });
-        }
-      }
 
       let effectiveSystem = PERSONA_SYSTEM_INSTRUCTIONS[appState.persona] || PERSONA_SYSTEM_INSTRUCTIONS['daksh-core'];
       if (knowledgeContext && knowledgeContext.trim()) {
         effectiveSystem += `\n\n=== INGESTED KNOWLEDGE BASE CONTEXT ===\n${knowledgeContext}\n=======================================`;
       }
 
-      const geminiBody = {
-        contents: geminiContents,
-        systemInstruction: {
-          parts: [{ text: effectiveSystem }]
-        },
-        generationConfig: {
-          temperature: Math.max(0.0, Math.min(1.5, appState.temperature || 0.7))
-        }
-      };
-
       currentAbortController = new AbortController();
-      let success = false;
-      let lastErrorMessage = '';
+      let streamSuccess = false;
 
+      // Try FastAPI /api/chat first
       try {
-        // Step 1: Direct Google Generative Language API Call (Works on GitHub Pages & standalone without server)
-        for (const model of candidateModels) {
-          try {
-            const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${encodeURIComponent(appState.apiKey || DEFAULT_PERMANENT_KEY)}&alt=sse`;
-            const response = await fetch(directUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              signal: currentAbortController.signal,
-              body: JSON.stringify(geminiBody)
-            });
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: currentAbortController.signal,
+          body: JSON.stringify({
+            messages: activeConv.messages.slice(0, -1),
+            temperature: appState.temperature,
+            fileAttachment: userMsg.attachment,
+            knowledgeContext: knowledgeContext
+          })
+        });
 
-            if (!response.ok) {
-              const errJson = await response.json().catch(() => ({}));
-              const msg = errJson.error?.message || `HTTP ${response.status}`;
-              lastErrorMessage = msg;
-              if (response.status === 404 || response.status === 503) {
-                continue;
-              } else if (response.status === 400 && (msg.includes('API_KEY') || msg.includes('API key'))) {
-                throw new Error('Invalid Gemini API Key. Please verify your key from https://aistudio.google.com/apikey and update it.');
-              } else {
-                throw new Error(msg);
-              }
-            }
+        if (response.ok) {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n\n');
+            buffer = lines.pop() || '';
 
-              buffer += decoder.decode(value, { stream: true });
-              const lines = buffer.split('\n\n');
-              buffer = lines.pop() || '';
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed.startsWith('data: ')) continue;
+              const dataStr = trimmed.slice(6).trim();
+              if (dataStr === '[DONE]') break;
 
-              for (const line of lines) {
-                const trimmed = line.trim();
-                if (!trimmed.startsWith('data: ')) continue;
-                const dataStr = trimmed.slice(6).trim();
-                if (dataStr === '[DONE]') break;
-
-                try {
-                  const parsed = JSON.parse(dataStr);
-                  const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-                  if (chunk) {
-                    assistantMsg.content += chunk;
-                    updateLastAssistantMessage(assistantMsg.content);
-                  }
-                } catch (e) {
-                  if (dataStr) {
-                    assistantMsg.content += dataStr;
-                    updateLastAssistantMessage(assistantMsg.content);
-                  }
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.text) {
+                  assistantMsg.content += parsed.text;
+                  updateLastAssistantMessage(assistantMsg.content);
+                }
+              } catch (e) {
+                if (dataStr) {
+                  assistantMsg.content += dataStr;
+                  updateLastAssistantMessage(assistantMsg.content);
                 }
               }
             }
-
-            success = true;
-            break;
-          } catch (modelErr) {
-            if (modelErr.name === 'AbortError') throw modelErr;
-            lastErrorMessage = modelErr.message;
           }
-        }
 
-        // Step 2: Fallback to local server /api/chat if direct call failed (e.g. running behind Python FastAPI backend)
-        if (!success) {
-          try {
-            const localResponse = await fetch('/api/chat', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              signal: currentAbortController.signal,
-              body: JSON.stringify({
-                messages: activeConv.messages.slice(0, -1).filter(m => !m.isKeyPrompt),
-                temperature: appState.temperature,
-                apiKey: appState.apiKey || DEFAULT_PERMANENT_KEY,
-                fileAttachment: userMsg.attachment,
-                knowledgeContext: knowledgeContext
-              })
-            });
-
-            if (localResponse.ok) {
-              const reader = localResponse.body.getReader();
-              const decoder = new TextDecoder();
-              let buffer = '';
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n\n');
-                buffer = lines.pop() || '';
-                for (const line of lines) {
-                  const trimmed = line.trim();
-                  if (!trimmed.startsWith('data: ')) continue;
-                  const dataStr = trimmed.slice(6).trim();
-                  if (dataStr === '[DONE]') break;
-                  try {
-                    const parsed = JSON.parse(dataStr);
-                    if (parsed.text) {
-                      assistantMsg.content += parsed.text;
-                      updateLastAssistantMessage(assistantMsg.content);
-                    }
-                  } catch (e) {}
-                }
-              }
-              success = true;
-            }
-          } catch (serverErr) {}
-        }
-
-        if (!success) {
-          throw new Error(lastErrorMessage || 'Unable to connect to Gemini API. Please check your network connection and Gemini API key.');
-        }
-
-        if (appState.autoSpeak && assistantMsg.content) {
-          speakText(assistantMsg.content);
+          if (assistantMsg.content.trim() && !assistantMsg.content.includes('Error communicating with Gemini') && !assistantMsg.content.includes('high demand')) {
+            streamSuccess = true;
+          }
         }
       } catch (err) {
         if (err.name === 'AbortError') {
           assistantMsg.content += '\n\n*(Generation stopped by user)*';
-        } else {
-          assistantMsg.content = `⚠️ **Error communicating with Gemini:** ${err.message}\n\n*Tip: Check or update your Gemini API key in [Settings ➔ Privacy & Security] or visit [Google AI Studio](https://aistudio.google.com/apikey).*`;
+          streamSuccess = true;
         }
-        updateLastAssistantMessage(assistantMsg.content);
-      } finally {
-        appState.isGenerating = false;
-        currentAbortController = null;
-        document.getElementById('stop-gen-btn').classList.add('hidden');
-        document.getElementById('send-btn').classList.remove('hidden');
-        const mobSend = document.getElementById('mobile-send-btn');
-        if (mobSend) mobSend.classList.remove('opacity-50', 'pointer-events-none');
-        saveUserData();
-        renderMessages();
       }
+
+      // FAIL-SAFE TIER 2: If server returned 404/503/error or high demand, use direct Pollinations AI
+      if (!streamSuccess) {
+        try {
+          assistantMsg.content = '';
+          const memoryMessages = activeConv.messages.slice(0, -1);
+          const historyForFallback = memoryMessages.slice(-10).map(m => ({
+            role: (m.role === 'assistant' || m.role === 'model') ? 'assistant' : 'user',
+            content: m.content || ''
+          }));
+
+          const fallbackResponse = await fetch('https://text.pollinations.ai/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: currentAbortController.signal,
+            body: JSON.stringify({
+              messages: [
+                { role: 'system', content: effectiveSystem },
+                ...historyForFallback
+              ],
+              model: 'openai',
+              seed: Math.floor(Math.random() * 99999)
+            })
+          });
+
+          if (fallbackResponse.ok) {
+            const replyText = await fallbackResponse.text();
+            if (replyText) {
+              assistantMsg.content = replyText;
+              updateLastAssistantMessage(assistantMsg.content);
+              streamSuccess = true;
+            }
+          }
+        } catch (fbErr) {
+          if (fbErr.name === 'AbortError') {
+            assistantMsg.content += '\n\n*(Generation stopped by user)*';
+            streamSuccess = true;
+          }
+        }
+      }
+
+      if (!streamSuccess && !assistantMsg.content.trim()) {
+        assistantMsg.content = "⚠️ Unable to generate response. Please check your network connection and try again.";
+        updateLastAssistantMessage(assistantMsg.content);
+      }
+
+      if (appState.autoSpeak && assistantMsg.content) {
+        speakText(assistantMsg.content);
+      }
+
+      appState.isGenerating = false;
+      currentAbortController = null;
+      document.getElementById('stop-gen-btn')?.classList.add('hidden');
+      document.getElementById('send-btn')?.classList.remove('hidden');
+      const mobSend = document.getElementById('mobile-send-btn');
+      if (mobSend) mobSend.classList.remove('opacity-50', 'pointer-events-none');
+      saveUserData();
+      renderMessages();
     }
 
     function renderMessages() {
@@ -3078,9 +3038,6 @@ Engineered by Daksh Bugalia.`
     window.clearAllConversations = clearAllConversations;
     window.removeAttachment = removeAttachment;
     window.sendMessage = sendMessage;
-    window.triggerAIResponse = triggerAIResponse;
-    window.saveInlineApiKey = saveInlineApiKey;
-    window.updateApiKeyStatusBadge = updateApiKeyStatusBadge;
     window.stopGeneration = stopGeneration;
     window.ingestUrl = ingestUrl;
     window.openQuickActionsModal = openQuickActionsModal;

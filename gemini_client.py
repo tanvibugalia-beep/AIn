@@ -1,3 +1,4 @@
+import re
 """
 Gemini AI Client module for Daksh Intelligence.
 Ported from TypeScript (server.ts and src/services/api.ts).
@@ -22,12 +23,13 @@ import urllib.error
 from typing import List, Dict, Any, Generator, Optional
 
 CANDIDATE_MODELS = [
-    "gemini-2.5-flash",
-    "gemini-1.5-flash",
     "gemini-2.0-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-3.8-flash",
+    "gemini-1.5-flash",
+    "gemini-2.5-flash",
+    "gemini-1.5-pro",
 ]
+
+DEFAULT_PERMANENT_KEY = "AQ.Ab8RN6IiMRpqrAQY3ac-dqS1RTPg06OLG5DfFzZWnWhCbEaXEw"
 
 DEFAULT_SYSTEM_INSTRUCTION = """You are Daksh Intelligence, a state-of-the-art PC Desktop AI Assistant and Workstation Copilot, engineered and owned by Daksh Bugalia.
 You specialize in helping users on their personal computers with:
@@ -38,9 +40,66 @@ You specialize in helping users on their personal computers with:
 5. System workflows, shortcuts, file organization, terminal commands, and productivity.
 When asked who built or owns you, proudly state that you are Daksh Intelligence, personal PC copilot created and owned by Daksh Bugalia. Maintain a polite, razor-sharp, and resourceful PC assistant demeanor."""
 
+
+def is_image_generation_prompt(text: str, has_attachment: bool = False) -> tuple:
+    if not text:
+        return False, None
+    t = text.lower().strip()
+    triggers = [
+        r'\bgenerate\s+(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|portrait|graphic)\b',
+        r'\bcreate\s+(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|portrait|graphic)\b',
+        r'\bmake\s+(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|portrait|graphic)\b',
+        r'\bdraw\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|something|a\s+|an\s+)?',
+        r'\bpaint\s+(?:me\s+)?(?:an?\s+)?',
+        r'\bphoto\s+of\b',
+        r'\bpicture\s+of\b',
+        r'\bimage\s+of\b',
+        r'\bwallpaper\s+of\b',
+        r'चित्र', r'फोटो', r'तस्वीर', r'इमेज', r'ड्राइंग'
+    ]
+    for pattern in triggers:
+        if re.search(pattern, t, re.IGNORECASE):
+            return True, "generate"
+    if has_attachment:
+        for edit_word in [r'\bedit\b', r'\bchange\b', r'\bmodify\b', r'\banime\b', r'\bcartoon\b', r'\bcyberpunk\b', r'बदलो', r'एडिट']:
+            if re.search(edit_word, t, re.IGNORECASE):
+                return True, "edit"
+    return False, None
+
+def generate_image_card_html(prompt_text: str, is_edit: bool = False) -> str:
+    import urllib.parse, random
+    p = prompt_text.strip()
+    p = re.sub(r'^(?:please\s+)?(?:can\s+you\s+)?(?:generate|create|make|draw|paint|render)\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|illustration|drawing|art|wallpaper|graphic)?(?:\s+of)?\s*', '', p, flags=re.IGNORECASE)
+    p = re.sub(r'^(?:फोटो|चित्र|तस्वीर|इमेज)\s+(?:बनाओ|दिखाओ)\s*', '', p, flags=re.IGNORECASE)
+    raw_prompt = p.strip() or prompt_text.strip()
+    enhanced = f"{raw_prompt}, highly detailed artistic transformation, vibrant colors, 8k resolution, masterpiece" if is_edit else f"{raw_prompt}, cinematic lighting, photorealistic, 8k resolution, ultra detailed, masterpiece"
+    seed = random.randint(100000, 9999999)
+    encoded = urllib.parse.quote(enhanced)
+    img_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1024&height=1024&nologo=true&seed={seed}"
+    clean_p = raw_prompt.replace('"', '&quot;').replace('<', '&lt;')
+    title_text = "Here is the edited variation of your image:" if is_edit else "Here is your generated image:"
+    return f"""
+<div class="my-2 space-y-2.5 max-w-lg">
+  <p class="text-xs text-slate-200">✨ {title_text} <strong>"{clean_p}"</strong></p>
+  <div class="relative group rounded-2xl overflow-hidden border border-cyan-500/40 bg-[#060a14] shadow-2xl shadow-cyan-950/40">
+    <img src="{img_url}" alt="{clean_p}" class="w-full h-auto object-cover rounded-2xl transition duration-300 group-hover:scale-[1.01]" loading="lazy" />
+  </div>
+  <div class="flex items-center gap-2 pt-1">
+    <button onclick="downloadGeneratedImage('{img_url}', 'daksh_image_{seed}.png')" class="flex-1 py-2 px-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md shadow-cyan-500/20 active:scale-95">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      <span>Download Image (PNG)</span>
+    </button>
+    <a href="{img_url}" target="_blank" rel="noopener noreferrer" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs rounded-xl font-medium flex items-center justify-center gap-1 transition shrink-0" title="Open full resolution in new tab">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+      <span>Full View</span>
+    </a>
+  </div>
+</div>
+"""
+
 class GeminiClient:
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
+        self.api_key = (api_key or os.environ.get("GEMINI_API_KEY") or DEFAULT_PERMANENT_KEY).strip()
         self._sdk_client = None
         self._init_sdk()
 
@@ -105,6 +164,13 @@ class GeminiClient:
 
         # Retain last 12 messages for memory
         memory_messages = messages[-12:] if len(messages) > 12 else messages
+        # Check if user message is an image generation / edit request
+        if memory_messages:
+            last_text = memory_messages[-1].get("content", "")
+            is_img, action = is_image_generation_prompt(last_text, bool(file_attachment))
+            if is_img:
+                yield generate_image_card_html(last_text, is_edit=(action == "edit"))
+                return
 
         # Build contents structure
         contents = []
@@ -216,6 +282,29 @@ class GeminiClient:
             except Exception as e:
                 last_error = str(e)
                 continue
+
+        # Robust Tier 2 Fallback to Pollinations AI (Eliminates 503 high demand errors)
+        try:
+            fb_payload = {
+                "messages": [
+                    {"role": "system", "content": effective_system},
+                    *[{"role": ("assistant" if m.get("role") in ["assistant", "model"] else "user"), "content": m.get("content", "")} for m in memory_messages]
+                ],
+                "model": "openai"
+            }
+            fb_req = urllib.request.Request(
+                "https://text.pollinations.ai/",
+                data=json.dumps(fb_payload).encode("utf-8"),
+                headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"},
+                method="POST"
+            )
+            with urllib.request.urlopen(fb_req, timeout=25) as fb_res:
+                ans_text = fb_res.read().decode("utf-8", errors="replace")
+                if ans_text and ans_text.strip():
+                    yield ans_text
+                    return
+        except Exception:
+            pass
 
         yield f"\n\n⚠️ **Error communicating with Gemini:** {last_error or 'Unable to generate response. Check your API key and network connection.'}"
 
