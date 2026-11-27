@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPrep With Daksh — Class 10, 11 & 12 Exam Prep</title>
+  <meta name="description" content="Comprehensive study material, chapter notes, formula deck, quizzes, board practice papers, and AI tutoring for Class 10, 11, and 12." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="static/css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar Navigation (Desktop) -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">EP</div>
+        <div>
+          <div class="brand-title">EduPrep</div>
+          <div class="brand-sub">With Daksh</div>
+        </div>
+      </div>
+
+      <div class="class-switcher-sidebar">
+        <label for="globalClassSelect" class="sidebar-label">Active Class</label>
+        <select id="globalClassSelect" class="class-select">
+          <option value="class_10">Class 10 • Secondary Board</option>
+          <option value="class_11">Class 11 • Senior Secondary</option>
+          <option value="class_12">Class 12 • Senior Board</option>
+        </select>
+      </div>
+
+      <nav class="nav-links" id="sidebarNav">
+        <button class="nav-item active" data-view="home"><span>🏠</span> Home</button>
+        <button class="nav-item" data-view="formulas"><span>📐</span> Formula Deck</button>
+        <button class="nav-item" data-view="files"><span>📁</span> Study Files</button>
+        <button class="nav-item" data-view="papers"><span>📝</span> Practice Papers</button>
+        <button class="nav-item" data-view="search"><span>🔍</span> Search</button>
+        <button class="nav-item" data-view="progress"><span>📊</span> Progress</button>
+        <button class="nav-item" data-view="tutor"><span>🤖</span> Daksh AI Tutor</button>
+        <button class="nav-item nav-admin hidden" id="adminNavBtn" data-view="admin"><span>🛡️</span> Admin Studio</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="themeToggleBtn" class="theme-btn" title="Toggle Light/Dark Mode">
+          <span id="themeIcon">🌙</span> <span id="themeLabel">Dark Mode</span>
+        </button>
+        <button id="adminLoginTrigger" class="theme-btn" style="margin-top:8px;" title="Admin Access">
+          <span>🔐</span> <span id="adminTriggerLabel">Admin Access</span>
+        </button>
+        <button id="sidebarAdminLogoutBtn" class="theme-btn hidden" style="margin-top:8px;border-color:var(--rose);color:var(--rose);" title="Logout Admin Studio">
+          <span>🚪</span> <span>Logout Admin</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrap">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="backBtn" class="back-btn hidden" aria-label="Go back">← Back</button>
+          <h1 id="pageTitle" class="page-title">EduPrep With Daksh</h1>
+          <span id="adminBadgeTop" class="badge badge-amber hidden">ADMIN MODE</span>
+          <button id="topAdminLogoutBtn" class="btn btn-sm btn-rose hidden" style="margin-left:6px;">🚪 Logout</button>
+        </div>
+        <div class="topbar-right">
+          <select id="mobileClassSelect" class="class-select mobile-only" aria-label="Select Class">
+            <option value="class_10">Class 10</option>
+            <option value="class_11">Class 11</option>
+            <option value="class_12">Class 12</option>
+          </select>
+          <button id="mobileThemeBtn" class="icon-btn mobile-only" title="Toggle Theme">🌙</button>
+        </div>
+      </header>
+
+      <main id="mainContent" class="main-content">
+        <div class="loading-state">Loading study material...</div>
+      </main>
+    </div>
+
+    <!-- Bottom Nav (Mobile) -->
+    <nav class="bottom-nav" id="mobileNav">
+      <button class="bottom-nav-item active" data-view="home"><span>🏠</span><small>Home</small></button>
+      <button class="bottom-nav-item" data-view="formulas"><span>📐</span><small>Formulas</small></button>
+      <button class="bottom-nav-item" data-view="files"><span>📁</span><small>Files</small></button>
+      <button class="bottom-nav-item" data-view="papers"><span>📝</span><small>Papers</small></button>
+      <button class="bottom-nav-item" data-view="tutor"><span>🤖</span><small>Daksh AI</small></button>
+      <button class="bottom-nav-item hidden" id="mobileAdminBtn" data-view="admin"><span>🛡️</span><small>Admin</small></button>
+    </nav>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div id="adminModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="margin:0;">🛡️ Admin Studio Sign-In</h3>
+        <button id="closeAdminModal" class="btn btn-sm btn-outline">✕</button>
+      </div>
+      <p class="muted" style="margin-top:0;">Sign in with your Daksh Intelligence owner account (`dakshbugalia1@gmail.com`) or launch from Daksh Intelligence for automatic access.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <input id="adminEmailInput" class="input" type="email" placeholder="dakshbugalia1@gmail.com" value="dakshbugalia1@gmail.com" />
+        <input id="adminPassInput" class="input" type="password" placeholder="Admin Password" />
+        <div id="adminLoginError" class="muted" style="color:var(--rose);display:none;"></div>
+        <button id="adminLoginSubmit" class="btn btn-primary">Unlock Admin Studio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Detail Modal (Admin Studio) -->
+  <div id="studentDetailModal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:720px;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="margin:0;">👨‍🎓 Student Activity Details</h3>
+        <button id="closeStudentDetailModal" class="btn btn-sm btn-outline">✕</button>
+      </div>
+      <div id="studentDetailBody" class="muted">Loading...</div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="static/js/app.js?v=20261127"></script>
+</body>
+</html>
