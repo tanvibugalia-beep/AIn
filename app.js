@@ -346,7 +346,7 @@ const descriptions = {
   'Commanding Studio': 'A developer workspace concept for Python, code editing, terminal tools, and project building. A real code editor and safe execution environment still need to be integrated.'
 };
 const symbols = {'AI Chat':'✳','EduPer with Daksh':'⌁','Commanding Studio':'⌘'};
-document.querySelectorAll('.app-card').forEach(card => card.addEventListener('click', () => {
+document.querySelectorAll('.app-card').forEach(card => card.addEventListener('click', async () => {
   const app = card.dataset.app;
   if (app === 'AI Chat') {
     // 🤖 1. AI Chat: Opens directly when selected, without asking user to log in again!
@@ -354,7 +354,12 @@ document.querySelectorAll('.app-card').forEach(card => card.addEventListener('cl
     return;
   }
 
-  // 2. EduPer with Daksh & 3. Coding Workspace: Info modal (will be added next)
+  if (app === 'EduPer with Daksh') {
+    await openEduPrepApp();
+    return;
+  }
+
+  // 3. Coding Workspace: Info modal (will be added next)
   document.getElementById('modalTitle').textContent = app;
   document.getElementById('modalDescription').textContent = descriptions[app] || '';
   document.getElementById('modalSymbol').textContent = symbols[app] || '✦';
@@ -443,10 +448,96 @@ function returnToDashboard() {
     chatScreen.classList.add('hidden');
     chatScreen.style.display = 'none';
   }
+  const eduprepScreen = document.getElementById('eduprepScreen');
+  if (eduprepScreen) {
+    eduprepScreen.classList.add('hidden');
+    eduprepScreen.style.display = 'none';
+  }
   const homeScreen = document.getElementById('homeScreen');
   if (homeScreen) {
     homeScreen.classList.remove('hidden');
     homeScreen.style.display = '';
+  }
+}
+
+async function openEduPrepApp() {
+  const home = document.getElementById('homeScreen');
+  if (home) {
+    home.classList.add('hidden');
+    home.style.display = 'none';
+  }
+  const login = document.getElementById('loginScreen');
+  if (login) {
+    login.classList.add('hidden');
+    login.style.display = 'none';
+  }
+
+  const eduprepScreen = document.getElementById('eduprepScreen');
+  const frame = document.getElementById('eduprepFrame');
+  const offlineNotice = document.getElementById('eduprepOfflineNotice');
+  const statusText = document.getElementById('eduprepStatusText');
+  const extLink = document.getElementById('eduprepExternalLink');
+
+  if (eduprepScreen) {
+    eduprepScreen.classList.remove('hidden');
+    eduprepScreen.style.display = 'flex';
+  }
+  if (offlineNotice) offlineNotice.classList.add('hidden');
+  if (frame) frame.classList.remove('hidden');
+  if (statusText) statusText.textContent = 'Starting EduPrep With Daksh...';
+
+  const eduprepHost = window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
+  let baseUrl = `http://${eduprepHost}:8001`;
+  let launchedOk = false;
+
+  try {
+    const res = await fetch('/api/launch-eduprep', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url) baseUrl = data.url.replace('127.0.0.1', eduprepHost);
+      launchedOk = !!data.ok;
+    }
+  } catch (e) {}
+
+  if (!launchedOk) {
+    try {
+      const ping = await fetch(`${baseUrl}/health`, { mode: 'cors' });
+      launchedOk = ping.ok;
+    } catch (e) {}
+  }
+
+  let targetUrl = baseUrl;
+  try {
+    if (currentUser && typeof currentUser.getIdToken === 'function') {
+      const idToken = await currentUser.getIdToken();
+      if (idToken) {
+        targetUrl = `${baseUrl}/#sso_token=${encodeURIComponent(idToken)}`;
+      }
+    }
+  } catch (e) {}
+
+  if (extLink) extLink.href = targetUrl;
+
+  if (launchedOk) {
+    if (statusText) statusText.textContent = 'Connected · Live';
+    if (frame) frame.src = targetUrl;
+  } else {
+    if (statusText) statusText.textContent = 'Server offline';
+    if (frame) frame.classList.add('hidden');
+    if (offlineNotice) offlineNotice.classList.remove('hidden');
+  }
+}
+
+function returnToDashboardFromEduPrep() {
+  returnToDashboard();
+}
+
+function reloadEduPrepFrame() {
+  const frame = document.getElementById('eduprepFrame');
+  if (frame && frame.src) {
+    frame.src = frame.src;
+  } else {
+    openEduPrepApp();
   }
 }
 
@@ -507,6 +598,9 @@ function syncUserToChat(user) {
 
 // Attach to window so inline onclick handlers can call them
 window.openAIChatApp = openAIChatApp;
+window.openEduPrepApp = openEduPrepApp;
+window.returnToDashboardFromEduPrep = returnToDashboardFromEduPrep;
+window.reloadEduPrepFrame = reloadEduPrepFrame;
 window.returnToDashboard = returnToDashboard;
 window.syncUserToChat = syncUserToChat;
 

@@ -51,6 +51,50 @@ app.add_middleware(
 API_KEY = os.environ.get("GEMINI_API_KEY", "")
 gemini_client = GeminiClient(api_key=API_KEY)
 
+EDUPREP_PORT = int(os.environ.get("EDUPREP_PORT", 8001))
+_eduprep_proc = None
+
+def _find_eduprep_dir() -> Optional[str]:
+    candidates = [
+        r"C:\Users\Admin\Downloads\pep\eduprep_app",
+        os.path.join(BASE_DIR, "eduprep_app"),
+        os.path.join(os.path.dirname(BASE_DIR), "pep", "eduprep_app"),
+    ]
+    for path in candidates:
+        if os.path.isdir(path) and os.path.isfile(os.path.join(path, "app", "main.py")):
+            return path
+    return None
+
+def _is_port_open(host: str, port: int) -> bool:
+    import socket
+    try:
+        with socket.create_connection((host, port), timeout=0.4):
+            return True
+    except OSError:
+        return False
+
+def _ensure_eduprep_running(wait_seconds: float = 4.0) -> bool:
+    global _eduprep_proc
+    if _is_port_open("127.0.0.1", EDUPREP_PORT):
+        return True
+    eduprep_dir = _find_eduprep_dir()
+    if not eduprep_dir:
+        return False
+    import subprocess, time
+    if _eduprep_proc is None or _eduprep_proc.poll() is not None:
+        _eduprep_proc = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(EDUPREP_PORT)],
+            cwd=eduprep_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    deadline = time.time() + wait_seconds
+    while time.time() < deadline:
+        if _is_port_open("127.0.0.1", EDUPREP_PORT):
+            return True
+        time.sleep(0.2)
+    return _is_port_open("127.0.0.1", EDUPREP_PORT)
+
 # ----------------- DATA MODELS -----------------
 
 class FetchUrlRequest(BaseModel):
@@ -271,6 +315,23 @@ def api_run_code(req: RunCodeRequest):
             "stderr": str(e),
             "returncode": -1
         }
+
+@app.get("/api/eduprep-status")
+def api_eduprep_status():
+    return {
+        "running": _is_port_open("127.0.0.1", EDUPREP_PORT),
+        "url": f"http://127.0.0.1:{EDUPREP_PORT}",
+        "dir": _find_eduprep_dir(),
+    }
+
+@app.post("/api/launch-eduprep")
+def api_launch_eduprep():
+    ok = _ensure_eduprep_running(wait_seconds=4.0)
+    return {
+        "ok": ok,
+        "url": f"http://127.0.0.1:{EDUPREP_PORT}",
+        "dir": _find_eduprep_dir(),
+    }
 
 @app.get("/logo.jpg")
 def get_logo():
